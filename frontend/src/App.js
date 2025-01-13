@@ -1,5 +1,5 @@
 import logo from './images/ChronoCanvasLogo1.png';
-import './App.css';
+import './styles/App.css';
 
 function App() {
   return (
