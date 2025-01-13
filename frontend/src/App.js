@@ -1,4 +1,4 @@
-import logo from './images/ChronoCanvasLogo.png';
+import logo from './images/ChronoCanvasLogo1.png';
 import './App.css';
 
 function App() {
