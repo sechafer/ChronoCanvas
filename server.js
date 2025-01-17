@@ -1,6 +1,6 @@
 // does all of this need its own file in server.js or does it need to be in the app.js file in the frontend folder?
 const express = require('express');
-const connectDB = require('./db'); // Adjust the path as necessary
+const connectDB = require('./database.js'); // Adjust the path as necessary
 
 const app = express();
 
