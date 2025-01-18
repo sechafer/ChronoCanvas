@@ -1,14 +1,22 @@
-import logo from './images/ChronoCanvasLogo.png';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/App.css';
+import Navbar from './components/navbar';
+import Home from './pages/home';
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} alt="logo" style={{width: '150px'}} />
-      </header>
-    </div>
+    <Router>
+      <div className="App app-background body">
+        <Navbar />
+        <div className='main pt-5'>
+          <Routes>
+            <Route path="/" element={<Home /> } />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
-export default App;
+
