@@ -1,6 +1,14 @@
 .App {
   text-align: center;
 }
+.app-background{
+  background-image: url('../images/canvas-background.webp');
+    background-size: cover; /* Ensures the image covers the entire element */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents tiling */
+    height: 100vh; /* Full viewport height */
+    width: 100vw;
+}
 
 .App-logo {
   height: 40vmin;
@@ -14,7 +22,6 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -28,11 +35,26 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Wrapper for the date picker */
+.date-picker-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 300px; /* Adjust the width as needed */
 }
+
+/* Styling the calendar icon */
+.calendar-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px; /* Adjust the horizontal positioning of the icon */
+  transform: translateY(-50%);
+  color: #6c757d; /* Gray color for the icon */
+  pointer-events: none; /* Prevent icon from blocking clicks */
+  z-index: 2;
+}
+
+/* Styling the input field */
+.date-input {
+  padding-left: 35px; /* Add padding to make room for the icon */
+}
+
