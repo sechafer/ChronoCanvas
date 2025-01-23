@@ -13,6 +13,7 @@ Given a birth date, provide the following details in JSON format:
 - Birthstone (the one most popular associated with the birth month)
 - Birthstone Symbol (what the birthstone means)
 - Western zodiac sign
+- Western zodiac sign personality traits (top three)
 - Chinese zodiac sign
 - Chinese zodiac element
 - Birth flower (associated with the birth month)
@@ -27,6 +28,7 @@ Expected Output:
   "birthstone": "Aquamarine",
   "birthstoneSymbol": "Protection, Health, and Tranquility",
   "zodiac": "Pisces",
+  "zodiacSymbol": "Energetic, candid, and willful",
   "chineseZodiac": "Horse",
   "chineseZodiacElement": "Metal",
   "birthFlower": "Daffodil"

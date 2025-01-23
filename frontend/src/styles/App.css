@@ -58,3 +58,22 @@
   padding-left: 35px; /* Add padding to make room for the icon */
 }
 
+
+.backgroundStyle {
+  width: 350px;
+  height: 350px;
+  background-image: url('../images/paints/paint2.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.text-path{
+  transform: rotate(180deg);
+}
+
+
+
+
