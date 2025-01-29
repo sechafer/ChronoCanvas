@@ -41,17 +41,17 @@ export default function DateEntry({ onDateSelect }) {
             <h1>Welcome to ChronoCanvas!</h1>
             <h5>Enter your birthday to paint your day!</h5>
             <div className='d-flex'>
-                <InputGroup className="mb-3 d-flex justify-content-center">
+                <InputGroup className="mb-3 d-flex justify-content-center text-dark">
                     <DatePicker
-                        ref={datePickerRef} // Attach the ref to the DatePicker
+                        ref={datePickerRef}
                         selected={selectedDate}
                         onChange={handleDateChange}
                         customInput={
                             <Form.Control
                                 type="text"
-                                placeholder="MM/DD/YYYY"
                             />
                         }
+                        placeholderText="MM/DD/YYYY"
                         dateFormat="MM/dd/yyyy"
                         showPopperArrow={false}
                     />
