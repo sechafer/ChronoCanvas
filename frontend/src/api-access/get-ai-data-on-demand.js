@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { generateAIContent } from "../ai/generativeAI"; // Adjust the path if necessary
+import { generateAIContent } from "../ai/generativeAI"; 
 
 export const useFetchOnDemand = () => {
     const [birthDate, setBirthDate] = useState(null);
@@ -15,7 +15,7 @@ export const useFetchOnDemand = () => {
             try {
                 const aiData = await generateAIContent(birthDate);
                 setData(aiData);
-                setError(""); // Clear previous errors
+                setError("");
             } catch (err) {
                 setError("Failed to fetch AI data");
                 console.error("Error fetching AI data:", err);
