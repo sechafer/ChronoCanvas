@@ -2,46 +2,39 @@ import React, { useEffect, useState, useMemo } from 'react';
 
 const BrushStrokeBehindText = ({
   text = 'Hello World',
-  direction = 'leftToRight', // or 'rightToLeft'
-  strokeWidth = 50, // Thicker stroke for a prominent look
+  direction = 'leftToRight',
+  strokeWidth = 60,
   animationDuration = 2,
   fontSize = 24,
-  fontFamily = 'Arial', // Default font family
-  paddingX = 50, // Padding on the left and right
-  paddingY = 30, // Padding on the top and bottom
+  fontFamily = 'Arial',
+  paddingX = 70,
+  paddingY = 10, // Reduced padding on the top and bottom
   onColorGenerated,
 }) => {
-  const [textWidth, setTextWidth] = useState(300); // Default width for the text
-  const [textHeight, setTextHeight] = useState(fontSize); // Height based on font size
+  const [textWidth, setTextWidth] = useState(300);
+  const [textHeight, setTextHeight] = useState(fontSize);
 
-  // Generate random stroke color on mount
   const strokeColor = useMemo(() => {
-    // Generate a random color
     const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
-    
-    // Validate that the randomColor is a valid hex color, otherwise use a fallback
     const isValidColor = /^#[0-9A-F]{6}$/i.test(randomColor);
-    return isValidColor ? randomColor : "#FF5733"; // Default color is Vibrant Orange
+    return isValidColor ? randomColor : "#FF5733";
   }, []);
-  
+
   useEffect(() => {
     if (onColorGenerated) {
-      onColorGenerated(strokeColor); // Send the color to the parent once
+      onColorGenerated(strokeColor);
     }
   }, [strokeColor, onColorGenerated]);
-  
 
-  // Measure the text width dynamically
   useEffect(() => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     context.font = `${fontSize}px ${fontFamily}`;
     const measuredWidth = context.measureText(text).width;
     setTextWidth(measuredWidth);
-    setTextHeight(fontSize * 1.2); // Adjust height for line spacing
+    setTextHeight(fontSize * 1.2);
   }, [text, fontSize, fontFamily]);
 
-  // Define the path shape
   const getPathDefinition = () => {
     if (direction === 'leftToRight') {
       return `M0,${textHeight / 2 + paddingY} 
@@ -59,17 +52,17 @@ const BrushStrokeBehindText = ({
   return (
     <svg
       width={textWidth + paddingX * 2}
-      height={textHeight + paddingY * 2}
-      viewBox={`0 0 ${textWidth + paddingX * 2} ${textHeight + paddingY * 2}`}
+      height={textHeight + paddingY * 1.5} // Adjusted height to reduce bottom padding
+      viewBox={`-10 -10 ${textWidth + paddingX * 2 + 20} ${textHeight + paddingY * 1.5 + 20}`}
       style={{ display: 'block' }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Brush Stroke Path */}
       <path
         d={getPathDefinition()}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
+        strokeLinejoin="round"
         fill="none"
         style={{
           strokeDasharray: textWidth + paddingX * 2,
@@ -79,14 +72,12 @@ const BrushStrokeBehindText = ({
       />
       <defs>
         <filter id="shadow">
-        <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="black" />
+          <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="black" />
         </filter>
-    </defs>
-
-      {/* Text positioned in the center */}
+      </defs>
       <text
         x="50%"
-        y="40%"
+        y="40%" // Adjust the text position slightly upward
         dominantBaseline="middle"
         textAnchor="middle"
         fontSize={fontSize}
@@ -96,8 +87,6 @@ const BrushStrokeBehindText = ({
       >
         {text}
       </text>
-
-      {/* Keyframe animation for the stroke */}
       <style>
         {`
           @keyframes drawStroke {
@@ -112,3 +101,4 @@ const BrushStrokeBehindText = ({
 };
 
 export default BrushStrokeBehindText;
+

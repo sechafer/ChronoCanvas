@@ -2,12 +2,13 @@
   text-align: center;
 }
 .app-background{
-  background-image: url('../images/canvas-background.webp');
-    background-size: cover; /* Ensures the image covers the entire element */
-    background-position: center; /* Centers the image */
-    background-repeat: no-repeat; /* Prevents tiling */
-    height: 100vh; /* Full viewport height */
-    width: 100vw;
+    /* background-image: url('../images/canvas-background.webp');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    height: 100vh; 
+    width: 100vw; */
+    color: fff;
 }
 
 .App-logo {
