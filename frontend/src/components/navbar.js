@@ -7,42 +7,39 @@ export default function Navbar() {
   return (
     <div className="fixed-top">
       <nav
-        className="navbar navbar-light py-2 px-3"
+        className="navbar py-2 px-3"
         style={{
-          backgroundImage: `url(${navbarBackground})`, // Set the background image
-          backgroundSize: "cover", // Ensure the image covers the entire navbar
-          backgroundRepeat: "no-repeat", // Prevent tiling
-          backgroundPosition: "center", // Center the image
+          backgroundImage: `url(${navbarBackground})`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
         }}
       >
-        <div className="container-fluid">
-          {/* Logo on the left */}
-          <div className="d-flex align-items-center">
+        <div className="container-fluid d-flex align-items-center">
+          {/* Logo - Hidden on Small Screens */}
+          <div className="d-none d-sm-block">
             <Link to="/">
               <img 
                 src={logo} 
-                height="80px" 
+                height="100px" 
                 alt="ChronoCanvas Logo" 
-                className="navbar-brand" 
                 style={{
                   cursor: "pointer",
                   borderRadius: "20%",
-                  objectFit: "cover", 
+                  objectFit: "cover",
                 }}
               />
             </Link>
           </div>
 
-          {/* Title in the center */}
-          <div className="d-flex justify-content-center flex-grow-1">
-            <h1 className="text-dark m-0 bg-light rounded px-3 ms-2">
+          {/* Title & Subtitle - Always Centered with Background */}
+          <div className="d-flex flex-grow-1 justify-content-center me-sm-5 me-5 text-center">
+            <div className="bg-light rounded px-3 py-1 me-sm-5 me-0">
+              <h1 className="text-dark m-0 border-bottom">
                 Chrono<b>Canvas</b>
-            </h1>
-          </div>
-
-          {/* Subtitle on the right */}
-          <div className="d-flex align-items-center">
-            <p className="text-light m-0 bg-dark rounded px-2">Paint Your Day</p>
+              </h1>
+              <small className="text-dark"><b>Paint</b> Your Day</small>
+            </div>
           </div>
         </div>
       </nav>

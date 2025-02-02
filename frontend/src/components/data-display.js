@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid"; // Import UUID to generate unique IDs
 import BrushStrokeBehindText from "./brushstroke";
 import splat from "../images/paints/splat.svg";
 import blob from "../images/paints/blob.svg";
@@ -7,6 +8,7 @@ import brush2 from "../images/paints/brush2.svg";
 import splat2 from "../images/paints/splat2.svg";
 
 export default function DataDisplay({
+  id, // Accept id as a prop
   name,
   title,
   description,
@@ -14,9 +16,9 @@ export default function DataDisplay({
 }) {
   const [backgroundColor, setBackgroundColor] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState(null);
+  const [uniqueId, setUniqueId] = useState(id || uuidv4()); // Generate unique ID only if not passed
 
   useEffect(() => {
-    // Update background color and image whenever `name`, `title`, or other props change
     if (name) {
       const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
       setBackgroundColor(randomColor);
@@ -56,7 +58,10 @@ export default function DataDisplay({
   };
 
   return (
-    <div className="d-flex flex-column align-items-center text-center position-relative">
+    <div
+      id={`data-display-${uniqueId}`} // Ensure unique ID is applied
+      className="d-flex flex-column align-items-center text-center position-relative"
+    >
       {/* Brush Stroke Behind Title */}
       <div className="position-relative">
         <BrushStrokeBehindText
@@ -72,7 +77,7 @@ export default function DataDisplay({
         style={{
           width: "400px",
           height: "400px",
-          background: `${backgroundColor || "white"}`, // Background color
+          backgroundColor: `${backgroundColor || "white"}`, // Background color
           color: "white",
           backgroundImage: `url(${backgroundImage})`, // Dynamically set background image
           backgroundRepeat: "no-repeat",
@@ -101,6 +106,8 @@ export default function DataDisplay({
           {name}
         </span>
       </div>
+
+      {/* Description Positioned Separately */}
       {description && (
         <p
           className="position-absolute p-2 rounded"
@@ -115,4 +122,3 @@ export default function DataDisplay({
     </div>
   );
 }
-
