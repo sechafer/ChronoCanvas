@@ -2,20 +2,21 @@ const router = require('express').Router();
 const dedicationsController = require('../controllers/templeDedications.js');
 const validation = require('../middleware/validate.js');
 const { isAuthenticated } = require('../middleware/authenticate.js');
+const { verifyToken } = require('../middleware/auth'); // Importamos el middleware de JWT
 
-// Obtener un registro por ID
-router.get('/:id', isAuthenticated, validation.checkMongoId, dedicationsController.getSingle);
+// Obtener un registro por ID (JWT o Passport)
+router.get('/:id', isAuthenticated, verifyToken, validation.checkMongoId, dedicationsController.getSingle);
 
-// Obtener todos los registros
-router.get('/', isAuthenticated, dedicationsController.getAll);
+// Obtener todos los registros (JWT o Passport)
+router.get('/', isAuthenticated, verifyToken, dedicationsController.getAll);
 
-// Crear un nuevo registro
-router.post('/', isAuthenticated, validation.saveTempleDedication, dedicationsController.createDedication);
+// Crear un nuevo registro (JWT o Passport)
+router.post('/', isAuthenticated, verifyToken, validation.saveTempleDedication, dedicationsController.createDedication);
 
-// Actualizar un registro existente
-router.put('/:id', isAuthenticated, validation.checkMongoId, validation.saveTempleDedication, dedicationsController.updateDedication);
+// Actualizar un registro existente (JWT o Passport)
+router.put('/:id', isAuthenticated, verifyToken, validation.checkMongoId, validation.saveTempleDedication, dedicationsController.updateDedication);
 
-// Eliminar un registro
-router.delete('/:id', isAuthenticated, validation.checkMongoId, dedicationsController.deleteDedication);
+// Eliminar un registro (JWT o Passport)
+router.delete('/:id', isAuthenticated, verifyToken, validation.checkMongoId, dedicationsController.deleteDedication);
 
 module.exports = router;

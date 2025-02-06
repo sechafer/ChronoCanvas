@@ -2,20 +2,21 @@ const router = require('express').Router();
 const historyController = require('../controllers/ldsChurchHistory.js');
 const validation = require('../middleware/validate.js');
 const { isAuthenticated } = require('../middleware/authenticate.js');
+const { verifyToken } = require('../middleware/auth'); // Importamos JWT para protección
 
-// Obtener un registro por ID
-router.get('/:id', isAuthenticated, validation.checkMongoId, historyController.getSingle);
+// Obtener un registro por ID (JWT o Passport)
+router.get('/:id', isAuthenticated, verifyToken, validation.checkMongoId, historyController.getSingle);
 
-// Obtener todos los registros
-router.get('/', isAuthenticated, historyController.getAll);
+// Obtener todos los registros (JWT o Passport)
+router.get('/', isAuthenticated, verifyToken, historyController.getAll);
 
-// Crear un nuevo registro
-router.post('/', isAuthenticated, validation.saveChurchHistory, historyController.createHistory);
+// Crear un nuevo registro (JWT o Passport)
+router.post('/', isAuthenticated, verifyToken, validation.saveChurchHistory, historyController.createHistory);
 
-// Actualizar un registro existente
-router.put('/:id', isAuthenticated, validation.checkMongoId, validation.saveChurchHistory, historyController.updateHistory);
+// Actualizar un registro existente (JWT o Passport)
+router.put('/:id', isAuthenticated, verifyToken, validation.checkMongoId, validation.saveChurchHistory, historyController.updateHistory);
 
-// Eliminar un registro
-router.delete('/:id', isAuthenticated, validation.checkMongoId, historyController.deleteHistory);
+// Eliminar un registro (JWT o Passport)
+router.delete('/:id', isAuthenticated, verifyToken, validation.checkMongoId, historyController.deleteHistory);
 
 module.exports = router;

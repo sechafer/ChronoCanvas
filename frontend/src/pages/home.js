@@ -1,96 +1,91 @@
-import React from "react";
+import React, { useState } from "react";
 import DateEntry from "../components/date-entry";
 import { useFetchOnDemand } from "../api-access/get-ai-data-on-demand";
 import DataDisplay from "../components/data-display";
 import LoadingSpinner from "../components/loading-spinner";
-
+import PaintApp from "../components/paint";
+import SvgDisplay from "../components/svg-display";
+import { Container, Row, Col } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaintbrush} from "@fortawesome/free-solid-svg-icons";
 
 export default function Home() {
     const { data, loading, error, setBirthDate } = useFetchOnDemand();
-    //const { data, loading, error, setBirthDate } = useFetchOnDemand();
+    const [selectedDate, setSelectedDate] = useState(null); // Store selected date
 
-    const templeData = 
-    {
-        "_id": {
-          "$oid": "678c545358998ebaa3310944"
-        },
+    const templeData = {
+        "_id": { "$oid": "678c545358998ebaa3310944" },
         "temple": "Los Angeles California Temple",
         "dedication": "11–14 March 1956",
         "dedicatedBy": "David O. McKay"
-      };
-
-    const handleDateSelect = (selectedDate) => {
-        setBirthDate(selectedDate);
     };
 
-    if (loading)
-        return (
-          <div>
-            <LoadingSpinner />
-          </div>
-        );
+    const handleDateSelect = (date) => {
+        setSelectedDate(date); // Update state with selected date
+        setBirthDate(date);
+    };
+
+    if (loading) return <LoadingSpinner />;
 
     return (
         <>
+            <h1 className="text-dark fs-italic mt-5 mb-0 text-center">Welcome!</h1>
+            <small className="d-block text-center">Enter your birthday to paint your day!</small>
             <DateEntry onDateSelect={handleDateSelect} />
-            <div>
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {data && (
-                    <div className="container my-5">
-                        <div className="row">
-                            {/* Scattered Layout */}
-                            <div className="col-md-4">
-                                <DataDisplay
-                                    title="Birthstone"
-                                    name={data.birthstone}
-                                    description={data.birthstoneSymbol}
-                                />
-                            </div>
-                            <div className="col-md-4 mt-5 pb-5">
-                                <DataDisplay
-                                    title="Western Zodiac Sign"
-                                    name={data.zodiac}
-                                    description={data.zodiacSymbol}
-                                    descriptionStyle={{
-                                        top: "75%",
-                                        backgroundColor: "rgba(18, 217, 21, .9)",
-                                      }}
-                                />
-                            </div>
-                            <div className="col-md-4">
-                                <DataDisplay
-                                    title="Chinese Zodiac Sign"
-                                    name={data.chineseZodiac}
-                                    description={`Element: ${data.chineseZodiacElement}`}
-                                    descriptionStyle={{
-                                        top: "40%",
-                                        backgroundColor: "rgba(18, 217, 21, .9)",
-                                      }}
+            
+            <Container className="my-5">
+                {error && <p className="text-danger text-center">{error}</p>}
 
-                                />
-                            </div>
-                            <div className="col-md-4 mt-5 pt-5">
-                                <DataDisplay
-                                    title="Birth Flower"
-                                    name={data.birthFlower}
-                                />
-                            </div>
-                            <div className="col-md-4">
-                                <DataDisplay
-                                    title="Temple Dedicated"
-                                    name={templeData.temple}
-                                    description={<span style={{ fontSize: "11px" }}>Dedicated By: {templeData.dedicatedBy}</span>}
-                                    descriptionStyle={{
-                                        top: "90%",
-                                        backgroundColor: "rgba(18, 217, 21, .9)",
-                                      }}
-                                />
-                            </div>
-                            
-                        </div>
-                    </div>
+                {/* Display Selected Date with "Painted For You!" */}
+                {data && selectedDate && (
+                    <h2 className="text-center mt-2 mb-5 squiggle-underline">
+                        <FontAwesomeIcon icon={faPaintbrush} /> <b>{selectedDate}</b> <span className="fw-bold">Painted!</span>
+                    </h2>
                 )}
-            </div>
+
+                {data && (
+                    <Row className="g-3"> {/* Bootstrap row with gap */}
+                        {/* SVG Display: 2 Rows High, Takes 8 Cols */}
+                        <Col lg={8} className="d-flex flex-column justify-content-center mb-5">
+                            <SvgDisplay
+                                title="Your ChronoCanvas"
+                                image={data.svg}
+                                imgDescription={<span>{data.imgDescription}</span>}
+                                descriptionStyle={{
+                                    top: "90%",
+                                }}
+                            />
+                        </Col>
+
+                        {/* Birthstone */}
+                        <Col lg={4}>
+                            <DataDisplay title="Birthstone" name={data.birthstone} description={data.birthstoneSymbol} />
+                        </Col>
+
+                        {/* Western Zodiac */}
+                        <Col lg={4}>
+                            <DataDisplay title="Western Zodiac Sign" name={data.zodiac} description={data.zodiacSymbol} />
+                        </Col>
+
+                        {/* Chinese Zodiac */}
+                        <Col lg={4}>
+                            <DataDisplay title="Chinese Zodiac Sign" name={data.chineseZodiac} description={`Element: ${data.chineseZodiacElement}`} />
+                        </Col>
+
+                        {/* Birth Flower */}
+                        <Col lg={4}>
+                            <DataDisplay title="Birth Flower" name={data.birthFlower} />
+                        </Col>
+
+                        {/* Temple Dedicated */}
+                        <Col lg={4}>
+                            <DataDisplay title="Temple Dedicated" name={templeData.temple} description={<span style={{ fontSize: "11px" }}>Dedicated By: {templeData.dedicatedBy}</span>} />
+                        </Col>
+                    </Row>
+                )}
+
+                <PaintApp />
+            </Container>
         </>
     );
 }

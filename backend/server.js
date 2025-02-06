@@ -4,6 +4,12 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mongodb = require('./data/database');
 
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '1h';
+
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const session = require('express-session');
