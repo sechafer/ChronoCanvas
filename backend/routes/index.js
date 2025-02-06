@@ -1,78 +1,31 @@
-const express = require('express');
+const router = require('express').Router();
 const passport = require('passport');
-const router = express.Router();
-const usersController = require('../controllers/users.js');
-const validation = require('../middleware/validate.js');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { generateToken, verifyToken } = require('../middleware/auth.js');
-const { isAuthenticated } = require('../middleware/authenticate.js');
-const mongodb = require('../data/database');
+const { verifyToken, generateToken } = require('../middleware/auth.js');
 
-// Original routes
+// Rutas de autenticación
+router.use('/auth', require('./auth'));
+
+// Ruta de login directa
+router.get('/login', (req, res) => {
+    res.redirect('/auth/login');
+});
+
+// Rutas públicas
 router.use('/', require('./swagger'));
-router.use('/ldsChurchHistory', require('./ldsChurchHistory'));
-router.use('/templeDedications', require('./templeDedications'));
 
-// Authentication routes
-router.get('/login', passport.authenticate('github'), (req, res) => {});
-
-router.get('/logout', function (req, res, next) {
-    req.logout(function(err) {
-        if (err) { return next(err); }
-        res.redirect('/');
-    });
-});
-
-// New authentication routes
-router.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+// Rutas de GitHub OAuth
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+router.get('/auth/github/callback', 
+    passport.authenticate('github', { failureRedirect: '/auth/login' }),
+    (req, res) => {
+        const token = generateToken(req.user);
+        res.json({ token, user: req.user });
     }
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = { username, email, password: hashedPassword };
-        const result = await mongodb.getDatabase().db().collection('users').insertOne(user);
-        if (result.acknowledged) {
-            res.status(201).json({ message: 'Usuario registrado exitosamente' });
-        } else {
-            res.status(500).json({ message: 'Error al registrar usuario' });
-        }
-    } catch (error) {
-        console.error("Error en registro:", error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-});
+);
 
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await mongodb.getDatabase().db().collection('users').findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'Usuario no encontrado' });
-        }
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: 'Contraseña incorrecta' });
-        }
-        const token = generateToken(user);
-        res.status(200).json({ token });
-    } catch (error) {
-        console.error("Error en login:", error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-});
-
-// Protected routes
-router.get('/protected', isAuthenticated, verifyToken, (req, res) => {
-    res.json({ message: 'Acceso autorizado', user: req.user });
-});
-
-// User CRUD routes
-router.get('/users/:id', isAuthenticated, verifyToken, validation.checkMongoId, usersController.getSingle);
-router.get('/users', isAuthenticated, verifyToken, usersController.getAll);
-router.put('/users/:id', isAuthenticated, verifyToken, validation.checkMongoId, validation.saveUser, usersController.updateUser);
-router.delete('/users/:id', isAuthenticated, verifyToken, validation.checkMongoId, usersController.deleteUser);
+// Rutas protegidas
+router.use('/ldsChurchHistory', verifyToken, require('./ldsChurchHistory'));
+router.use('/templeDedications', verifyToken, require('./templeDedications'));
+router.use('/users', verifyToken, require('./users'));
 
 module.exports = router;

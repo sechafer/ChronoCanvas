@@ -1,83 +1,111 @@
-/* eslint no-console: ["error", { allow: ["warn", "error"] }] */
-
 const express = require('express');
 const dotenv = require('dotenv');
 const mongodb = require('./data/database');
-
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-dotenv.config();
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '1h';
-
-const bodyParser = require('body-parser');
 const passport = require('passport');
-const session = require('express-session');
 const GitHubStrategy = require('passport-github2').Strategy;
+const session = require('express-session');
+const bodyParser = require('body-parser');
 const cors = require('cors');
+
+// Cargar variables de entorno
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Configuración de middleware básico
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Configuración de sesiones
 app.use(session({
-  secret: "secret",
-  resave: false,
-  saveUninitialized: true
-}))
+    secret: process.env.SESSION_SECRET || 'tu_secreto_seguro',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    }
+}));
 
-//express session init
-app.use(passport.initialize())
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
-//init passport on every route call
-app.use(passport.session())
+// Configuración de CORS
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}));
 
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Z-Key'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  next();
+// Serialización de usuario para Passport
+passport.serializeUser((user, done) => {
+    done(null, user);
 });
 
-app.use(cors({ methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT']}))
-app.use(cors({ origin: '*'}))
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
 
+// Configuración de la estrategia GitHub
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.GITHUB_CALLBACK_URL
+},
+async function(accessToken, refreshToken, profile, done) {
+    try {
+        const db = mongodb.getDatabase().db();
+        let user = await db.collection('users').findOne({ 
+            email: profile.emails?.[0]?.value 
+        });
+
+        if (!user) {
+            const newUser = {
+                firstName: profile.displayName?.split(' ')[0] || '',
+                lastName: profile.displayName?.split(' ').slice(1).join(' ') || '',
+                email: profile.emails?.[0]?.value,
+                authType: 'github',
+                githubId: profile.id,
+                created: new Date()
+            };
+
+            const result = await db.collection('users').insertOne(newUser);
+            if (result.acknowledged) {
+                user = newUser;
+            }
+        }
+
+        return done(null, user);
+    } catch (error) {
+        console.error('Error en autenticación de GitHub:', error);
+        return done(error, null);
+    }
+}));
+
+// Rutas
 app.use('/', require('./routes'));
 
-passport.use(new GitHubStrategy({
-  clientID: process.env.GITHUB_CLIENT_ID,
-  clientSecret: process.env.GITHUB_CLIENT_SECRET,
-  callbackURL: process.env.CALLBACK_URL
-},
-function (accessToken, refreshToken, profile, done) {
-    return done(null, profile);
-  }
-))
-
-passport.serializeUser((user, done) => {
-  done(null,user)
-});
-passport.deserializeUser((user, done) => {
-  done(null,user)
+// Manejo de errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
 });
 
-app.get('/', (req, res) => {
-  res.send(req.session.user !== undefined ? `Logged in as ${req.session.user.displayName}` : 'Logged Out' )
-});
-
-app.get('/github/callback', passport.authenticate('github', {
-  failureRedirect: 'api-docs', session: false }),
-  (req, res) => {
-    req.session.user = req.user;
-    res.redirect('/');
-  });
-
+// Conexión a la base de datos y inicio del servidor
 mongodb.intDb((err) => {
-  if (err) {
-    console.error(err);
-  } else {
-    app.listen(port, () => { console.warn(`Database is listening and Node is running on port ${port}`); });
-  }
+    if (err) {
+        console.error('Error al conectar con la base de datos:', err);
+        process.exit(1);
+    } else {
+        app.listen(port, () => {
+            console.log(`Servidor ejecutándose en el puerto ${port}`);
+        });
+    }
 });
+
+module.exports = app;
