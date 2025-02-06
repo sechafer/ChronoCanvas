@@ -84,6 +84,159 @@ async function(accessToken, refreshToken, profile, done) {
     }
 }));
 
+// Ruta base con documentación interactiva
+app.get('/', (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    
+    const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ChronoCanvas API</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .container {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            .auth-options {
+                display: flex;
+                gap: 20px;
+                margin: 20px 0;
+            }
+            .auth-button {
+                padding: 10px 20px;
+                border-radius: 4px;
+                text-decoration: none;
+                color: white;
+                font-weight: bold;
+            }
+            .github-button {
+                background-color: #24292e;
+            }
+            .docs-button {
+                background-color: #00b4d8;
+            }
+            code {
+                background-color: #f4f4f4;
+                padding: 2px 5px;
+                border-radius: 4px;
+                font-family: monospace;
+            }
+            pre {
+                background-color: #f4f4f4;
+                padding: 15px;
+                border-radius: 4px;
+                overflow-x: auto;
+            }
+            .endpoint {
+                margin: 10px 0;
+                padding: 10px;
+                border-left: 4px solid #00b4d8;
+                background-color: #f8f9fa;
+            }
+            .method {
+                font-weight: bold;
+                color: #e63946;
+            }
+            .protected-badge {
+                background-color: #ffd700;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>ChronoCanvas API</h1>
+            <p>Versión 1.0.0 - API para la gestión de historia de la Iglesia SUD y templos</p>
+
+            <div class="auth-options">
+                <a href="${baseUrl}/auth/github" class="auth-button github-button">Login con GitHub</a>
+                <a href="${baseUrl}/api-docs" class="auth-button docs-button">Documentación API</a>
+            </div>
+
+            <h2>Métodos de Autenticación</h2>
+            
+            <h3>1. GitHub OAuth</h3>
+            <div class="endpoint">
+                <p>Para autenticarte con GitHub, simplemente haz clic en el botón "Login con GitHub" arriba.</p>
+                <p>URL: <code>${baseUrl}/auth/github</code></p>
+            </div>
+
+            <h3>2. JWT (Email y Contraseña)</h3>
+            <h4>Registro de Usuario</h4>
+            <div class="endpoint">
+                <span class="method">POST</span> <code>${baseUrl}/auth/register</code>
+                <pre>
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "password": "yourpassword",
+    "birthDate": "1990-01-01"
+}</pre>
+            </div>
+
+            <h4>Login</h4>
+            <div class="endpoint">
+                <span class="method">POST</span> <code>${baseUrl}/auth/login</code>
+                <pre>
+{
+    "email": "john@example.com",
+    "password": "yourpassword"
+}</pre>
+            </div>
+
+            <h2>Endpoints Principales</h2>
+            <div class="endpoint">
+                <h3>Historia de la Iglesia</h3>
+                <p><span class="protected-badge">Protegido</span></p>
+                <code>${baseUrl}/ldsChurchHistory</code>
+            </div>
+
+            <div class="endpoint">
+                <h3>Dedicaciones de Templos</h3>
+                <p><span class="protected-badge">Protegido</span></p>
+                <code>${baseUrl}/templeDedications</code>
+            </div>
+
+            <div class="endpoint">
+                <h3>Usuarios</h3>
+                <p><span class="protected-badge">Protegido</span></p>
+                <code>${baseUrl}/users</code>
+            </div>
+
+            <h2>Notas Importantes</h2>
+            <ul>
+                <li>Todas las rutas protegidas requieren autenticación</li>
+                <li>El token JWT debe incluirse en el header: <code>Authorization: Bearer &lt;token&gt;</code></li>
+                <li>La documentación completa está disponible en <a href="${baseUrl}/api-docs">Swagger</a> después de autenticarse</li>
+            </ul>
+        </div>
+    </body>
+    </html>
+    `;
+
+    res.send(html);
+});
+
 // Rutas
 app.use('/', require('./routes'));
 
@@ -94,6 +247,11 @@ app.use((err, req, res, next) => {
         message: 'Error interno del servidor',
         error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
+});
+
+// Manejo de rutas no encontradas
+app.use((req, res) => {
+    res.status(404).json({ message: 'Ruta no encontrada' });
 });
 
 // Conexión a la base de datos y inicio del servidor
