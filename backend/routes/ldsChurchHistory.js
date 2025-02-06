@@ -2,7 +2,7 @@ const router = require('express').Router();
 const historyController = require('../controllers/ldsChurchHistory.js');
 const validation = require('../middleware/validate.js');
 const { isAuthenticated } = require('../middleware/authenticate.js');
-const { verifyToken } = require('../middleware/auth'); // Importamos JWT para protección
+const { verifyToken } = require('../middleware/auth.js'); // Importamos JWT para protección
 
 // Obtener un registro por ID (JWT o Passport)
 router.get('/:id', isAuthenticated, verifyToken, validation.checkMongoId, historyController.getSingle);

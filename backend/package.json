@@ -283,7 +283,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "Jennifer Gonzalez",
+  "author": "Samuel Chacon",
   "license": "ISC",
   "repository": {
     "type": "git",
