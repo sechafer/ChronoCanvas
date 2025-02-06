@@ -4,11 +4,6 @@ const { generateToken, verifyToken } = require('../middleware/auth.js');
 const mongodb = require('../data/database');
 const validation = require('../middleware/validate');
 
-// Página de login
-Router.get('/login', (req, res) => {
-    res.status(200).json({ message: 'Página de login' });
-});
-
 // Registro (ruta pública)
 Router.post('/register', validation.saveUser, async (req, res) => {
     const { firstName, lastName, email, password, birthDate } = req.body;
@@ -32,6 +27,8 @@ Router.post('/register', validation.saveUser, async (req, res) => {
         const result = await mongodb.getDatabase().db().collection('users').insertOne(user);
         if (result.acknowledged) {
             const token = generateToken(user);
+            req.session.user = user;
+            req.session.token = token;
             res.status(201).json({ 
                 message: 'Usuario registrado exitosamente',
                 token,
@@ -61,6 +58,8 @@ Router.post('/login', async (req, res) => {
         }
 
         const token = generateToken(user);
+        req.session.user = user;
+        req.session.token = token;
         res.status(200).json({ 
             token,
             user: {

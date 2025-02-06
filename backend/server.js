@@ -6,8 +6,8 @@ const GitHubStrategy = require('passport-github2').Strategy;
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const baseUrl = 'https://chronocanvas-api.onrender.com';
 
-// Cargar variables de entorno
 dotenv.config();
 
 const app = express();
@@ -17,29 +17,32 @@ const port = process.env.PORT || 3001;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configuración de sesiones
+// Configuración de sesiones (debe ir antes de passport)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'tu_secreto_seguro',
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
-    }
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        httpOnly: true
+    },
+    rolling: true
 }));
 
-// Inicializar Passport
+// Configuración de passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Configuración de CORS
+// Configuración de CORS actualizada
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'] // Añadido 'Accept'
 }));
 
-// Serialización de usuario para Passport
+// Serialización de usuario
 passport.serializeUser((user, done) => {
     done(null, user);
 });
@@ -47,42 +50,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
     done(null, user);
 });
-
-// Configuración de la estrategia GitHub
-passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.GITHUB_CALLBACK_URL
-},
-async function(accessToken, refreshToken, profile, done) {
-    try {
-        const db = mongodb.getDatabase().db();
-        let user = await db.collection('users').findOne({ 
-            email: profile.emails?.[0]?.value 
-        });
-
-        if (!user) {
-            const newUser = {
-                firstName: profile.displayName?.split(' ')[0] || '',
-                lastName: profile.displayName?.split(' ').slice(1).join(' ') || '',
-                email: profile.emails?.[0]?.value,
-                authType: 'github',
-                githubId: profile.id,
-                created: new Date()
-            };
-
-            const result = await db.collection('users').insertOne(newUser);
-            if (result.acknowledged) {
-                user = newUser;
-            }
-        }
-
-        return done(null, user);
-    } catch (error) {
-        console.error('Error en autenticación de GitHub:', error);
-        return done(error, null);
-    }
-}));
 
 // Ruta base con documentación interactiva
 app.get('/', (req, res) => {
@@ -124,12 +91,19 @@ app.get('/', (req, res) => {
                 text-decoration: none;
                 color: white;
                 font-weight: bold;
+                transition: background-color 0.3s;
             }
             .github-button {
                 background-color: #24292e;
             }
+            .github-button:hover {
+                background-color: #2f363d;
+            }
             .docs-button {
                 background-color: #00b4d8;
+            }
+            .docs-button:hover {
+                background-color: #0096c7;
             }
             code {
                 background-color: #f4f4f4;
@@ -160,6 +134,16 @@ app.get('/', (req, res) => {
                 font-size: 12px;
                 color: #333;
             }
+            .status-section {
+                margin-top: 20px;
+                padding: 10px;
+                background-color: #e8f4f8;
+                border-radius: 4px;
+            }
+            .login-status {
+                font-weight: bold;
+                color: #2c5282;
+            }
         </style>
     </head>
     <body>
@@ -167,23 +151,23 @@ app.get('/', (req, res) => {
             <h1>ChronoCanvas API</h1>
             <p>Versión 1.0.0 - API para la gestión de historia de la Iglesia SUD y templos</p>
 
-            <div class="auth-options">
-                <a href="${baseUrl}/auth/github" class="auth-button github-button">Login con GitHub</a>
-                <a href="${baseUrl}/api-docs" class="auth-button docs-button">Documentación API</a>
-            </div>
+          <div class="auth-options">
+               <a href="${baseUrl}/auth/github" class="auth-button github-button">Login con GitHub</a>
+              <a href="${baseUrl}/api-docs" class="auth-button docs-button">Documentación API</a>
+          </div>
 
             <h2>Métodos de Autenticación</h2>
             
             <h3>1. GitHub OAuth</h3>
             <div class="endpoint">
                 <p>Para autenticarte con GitHub, simplemente haz clic en el botón "Login con GitHub" arriba.</p>
-                <p>URL: <code>${baseUrl}/auth/github</code></p>
+                <p>URL: <code>/auth/github</code></p>
             </div>
 
             <h3>2. JWT (Email y Contraseña)</h3>
             <h4>Registro de Usuario</h4>
             <div class="endpoint">
-                <span class="method">POST</span> <code>${baseUrl}/auth/register</code>
+                <span class="method">POST</span> <code>/auth/register</code>
                 <pre>
 {
     "firstName": "John",
@@ -196,7 +180,7 @@ app.get('/', (req, res) => {
 
             <h4>Login</h4>
             <div class="endpoint">
-                <span class="method">POST</span> <code>${baseUrl}/auth/login</code>
+                <span class="method">POST</span> <code>/auth/login</code>
                 <pre>
 {
     "email": "john@example.com",
@@ -208,26 +192,36 @@ app.get('/', (req, res) => {
             <div class="endpoint">
                 <h3>Historia de la Iglesia</h3>
                 <p><span class="protected-badge">Protegido</span></p>
-                <code>${baseUrl}/ldsChurchHistory</code>
+                <code>/ldsChurchHistory</code>
             </div>
 
             <div class="endpoint">
                 <h3>Dedicaciones de Templos</h3>
                 <p><span class="protected-badge">Protegido</span></p>
-                <code>${baseUrl}/templeDedications</code>
+                <code>/templeDedications</code>
             </div>
 
             <div class="endpoint">
                 <h3>Usuarios</h3>
                 <p><span class="protected-badge">Protegido</span></p>
-                <code>${baseUrl}/users</code>
+                <code>/users</code>
+            </div>
+
+            <div class="status-section">
+                <h3>Estado de Sesión</h3>
+                <p class="login-status">
+                    ${req.session.user ? 
+                        `Conectado como: ${req.session.user.email}
+                         <br><a href="/auth/logout" class="auth-button github-button" style="margin-top: 10px;">Cerrar Sesión</a>` 
+                        : 'No has iniciado sesión'}
+                </p>
             </div>
 
             <h2>Notas Importantes</h2>
             <ul>
                 <li>Todas las rutas protegidas requieren autenticación</li>
                 <li>El token JWT debe incluirse en el header: <code>Authorization: Bearer &lt;token&gt;</code></li>
-                <li>La documentación completa está disponible en <a href="${baseUrl}/api-docs">Swagger</a> después de autenticarse</li>
+                <li>La documentación completa está disponible en <a href="/api-docs">Swagger</a> después de autenticarse</li>
             </ul>
         </div>
     </body>
@@ -251,7 +245,7 @@ app.use((err, req, res, next) => {
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
-    res.status(404).json({ message: 'Ruta no encontrada' });
+    res.status(404).redirect('/');
 });
 
 // Conexión a la base de datos y inicio del servidor
