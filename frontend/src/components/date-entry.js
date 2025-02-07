@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { Form, InputGroup, Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function DateEntry({ onDateSelect }) {
@@ -25,12 +23,6 @@ export default function DateEntry({ onDateSelect }) {
         }
     };
 
-    const handleIconClick = () => {
-        if (datePickerRef.current) {
-            datePickerRef.current.setOpen(true);
-        }
-    };
-
     return (
         <div className="d-flex flex-column align-items-center mt-3">
             <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
@@ -40,7 +32,7 @@ export default function DateEntry({ onDateSelect }) {
                         ref={datePickerRef}
                         selected={selectedDate}
                         onChange={handleDateChange}
-                        customInput={<Form.Control type="text" className="date-entry" />}
+                        customInput={<Form.Control type="date" className="date-entry" />}
                         placeholderText="MM/DD/YYYY"
                         dateFormat="MM/dd/yyyy"
                         showPopperArrow={false}
