@@ -287,10 +287,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kittys201/cse341-project2.git"
+    "url": "git+https://github.com/sechafer/ChronoCanvas.git"
   },
   "bugs": {
-    "url": "https://github.com/kittys201/cse341-project2/issues"
+    "url": "https://github.com/sechafer/ChronoCanvas/issues"
   },
-  "homepage": "https://github.com/kittys201/cse341-project2#readme"
+  "homepage": "https://github.com/sechafer/ChronoCanvas/#readme"
 }
