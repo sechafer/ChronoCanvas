@@ -1,17 +1,45 @@
-// Al inicio de server.js
+const express = require('express');
 const dotenv = require('dotenv');
+const mongodb = require('./data/database');
+const passport = require('passport');
+const GitHubStrategy = require('passport-github2').Strategy;
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const MongoStore = require('connect-mongo');
+
+// Cargar variables de entorno
 dotenv.config();
 
-const port = process.env.PORT || 3001;
-const baseUrl = process.env.BASE_URL || 'https://chronocanvas-api.onrender.com';
+const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
 
-// Configuración de CORS actualizada
+// Verificación de variables de entorno
+const checkRequiredEnvVars = () => {
+    const required = [
+        'GITHUB_CLIENT_ID',
+        'GITHUB_CLIENT_SECRET',
+        'SESSION_SECRET',
+        'BASE_URL',
+        'MONGODB_URL',
+        'JWT_SECRET'
+    ];
+
+    const missing = required.filter(key => !process.env[key]);
+    if (missing.length > 0) {
+        console.error('Faltan las siguientes variables de entorno:', missing);
+        process.exit(1);
+    }
+};
+
+checkRequiredEnvVars();
+
+const app = express();
+const port = process.env.PORT || 3001;
+
+// Configuración de CORS
 const corsOptions = {
     origin: [
-        'https://chronocanvas-1.onrender.com',
-        'https://chronocanvas-api.onrender.com',
-        'http://localhost:3000',
-        'http://localhost:3001'
+        process.env.FRONTEND_URL || 'http://localhost:3000'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -20,20 +48,110 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Configuración de sesión actualizada
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Configuración de sesiones con almacenamiento en MongoDB
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'tu_secreto_seguro',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URL,
+        collectionName: 'sessions'
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : undefined
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    },
+    rolling: true
+}));
+
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Serialización y deserialización de usuario
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
+
+// Configuración de Passport con GitHub
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.CALLBACK_URL,
+    scope: ['user:email']
+}, async function (accessToken, refreshToken, profile, done) {
+    try {
+        const user = {
+            githubId: profile.id,
+            email: profile.emails?.[0]?.value || `${profile.username}@github.com`,
+            firstName: profile.displayName || profile.username,
+            lastName: '',
+            authType: 'github'
+        };
+
+        const db = mongodb.getDatabase().db();
+        let existingUser = await db.collection('users').findOne({ githubId: profile.id });
+
+        if (!existingUser) {
+            const result = await db.collection('users').insertOne(user);
+            existingUser = { ...user, _id: result.insertedId };
+        }
+
+        return done(null, existingUser);
+    } catch (error) {
+        console.error('Error en autenticación GitHub:', error);
+        return done(error, null);
     }
 }));
 
-// Configuración de MongoDB actualizada
+// Middleware para prevenir caché
+const preventCache = (req, res, next) => {
+    res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+    next();
+};
+
+app.use('/auth/*', preventCache);
+app.use('/api-docs', preventCache);
+
+// Rutas
+app.use('/', require('./routes'));
+
+// Manejo de errores mejorado
+app.use((err, req, res, next) => {
+    console.error('Error detallado:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        code: err.code
+    });
+
+    if (err.name === 'InternalOAuthError') {
+        return res.redirect(`${process.env.FRONTEND_URL}?error=github_auth_failed&reason=${encodeURIComponent(err.message)}`);
+    }
+
+    res.status(500).json({
+        message: 'Error interno del servidor',
+        error: process.env.NODE_ENV === 'development' ? {
+            message: err.message,
+            type: err.name,
+            stack: err.stack
+        } : undefined
+    });
+});
+
+// Iniciar servidor
 mongodb.intDb((err) => {
     if (err) {
         console.error('Error al conectar con la base de datos:', err);
@@ -42,7 +160,9 @@ mongodb.intDb((err) => {
         app.listen(port, () => {
             console.log(`Servidor ejecutándose en el puerto ${port}`);
             console.log(`URL base: ${baseUrl}`);
-            console.log('Base de datos conectada y servidor iniciado');
+            console.log('Variables de entorno verificadas correctamente');
         });
     }
 });
+
+module.exports = app;

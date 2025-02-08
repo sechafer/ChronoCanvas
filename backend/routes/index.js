@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const passport = require('passport');
+const path = require('path');
 const { verifyToken, generateToken } = require('../middleware/auth.js');
 
-// Middleware para logs
+// Middleware de logs
 const logMiddleware = (req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
@@ -10,27 +11,21 @@ const logMiddleware = (req, res, next) => {
 
 router.use(logMiddleware);
 
-// Ruta de inicio de autenticación GitHub
-router.get('/auth/github', 
-    (req, res, next) => {
-        console.log('Iniciando autenticación con GitHub');
-        next();
-    },
-    passport.authenticate('github', { 
-        scope: ['user:email']
-    })
-);
+// ✅ Ruta principal: Devuelve una página HTML explicativa
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/index.html')); // Sirve la página estática
+});
 
-// Ruta de callback de GitHub
+// ✅ Ruta de autenticación con GitHub
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+// ✅ Callback de autenticación con GitHub
 router.get('/auth/github/callback',
-    passport.authenticate('github', { 
-        failureRedirect: '/',
-        session: true
-    }),
+    passport.authenticate('github', { failureRedirect: '/' }),
     async (req, res) => {
         try {
             console.log('Callback de GitHub ejecutado, usuario:', req.user);
-            
+
             if (!req.user) {
                 console.log('No se recibió usuario en callback');
                 return res.redirect(`${process.env.FRONTEND_URL}?error=auth_failed`);
@@ -40,9 +35,8 @@ router.get('/auth/github/callback',
             req.session.token = token;
             req.session.user = req.user;
 
-            // Verificar el tipo de respuesta esperada
-            const acceptHeader = req.headers.accept || '';
-            if (acceptHeader.includes('application/json')) {
+            // Si la petición es JSON, responder con los datos
+            if (req.headers.accept && req.headers.accept.includes('application/json')) {
                 return res.json({
                     success: true,
                     token,
@@ -50,8 +44,8 @@ router.get('/auth/github/callback',
                 });
             }
 
-            // Redirigir a la documentación de la API
-            res.redirect(`${process.env.BASE_URL}/api-docs`);
+            // Redirigir a Swagger
+            res.redirect(`${process.env.BASE_URL}/swagger/api-docs`);
         } catch (error) {
             console.error('Error en callback:', error);
             res.redirect(`${process.env.FRONTEND_URL}?error=server_error`);
@@ -59,7 +53,7 @@ router.get('/auth/github/callback',
     }
 );
 
-// Ruta para obtener el token
+// ✅ Ruta para obtener el token
 router.get('/auth/token', verifyToken, (req, res) => {
     if (req.session && req.session.token) {
         res.json({
@@ -71,26 +65,35 @@ router.get('/auth/token', verifyToken, (req, res) => {
     }
 });
 
-// Ruta de logout
+// ✅ Ruta de logout (verifica si hay sesión antes de destruirla)
 router.get('/auth/logout', (req, res) => {
+    if (!req.session) {
+        return res.status(400).json({ message: "No hay sesión activa" });
+    }
+    
     req.session.destroy((err) => {
         if (err) {
             console.error('Error al cerrar sesión:', err);
+            return res.status(500).json({ message: "Error al cerrar sesión" });
         }
-        res.redirect('/');
+        res.json({ message: "Sesión cerrada correctamente" });
     });
 });
 
-// Otras rutas
-router.use('/auth', require('./auth'));
-router.use('/', require('./swagger'));
+// ✅ Mover Swagger a `/swagger/api-docs`
+router.use('/swagger', require('./swagger'));
 
-// Rutas protegidas
+// ✅ Mantener autenticación con JWT y GitHub para rutas protegidas
 router.use('/ldsChurchHistory', verifyToken, require('./ldsChurchHistory'));
 router.use('/templeDedications', verifyToken, require('./templeDedications'));
 router.use('/users', verifyToken, require('./users'));
 
-// Manejo de rutas no encontradas
+// ✅ Agregar mensaje en `GET /auth/login`
+router.get('/auth/login', (req, res) => {
+    res.json({ message: "Usa POST /auth/login para iniciar sesión" });
+});
+
+// ✅ Manejo de rutas no encontradas (para evitar 404)
 router.use('*', (req, res) => {
     console.log('Ruta no encontrada:', req.originalUrl);
     res.status(404).json({ message: 'Ruta no encontrada' });

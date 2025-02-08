@@ -40,7 +40,8 @@ const swaggerUiOptions = {
 };
 
 // Rutas de Swagger
-router.use('/api-docs', checkAuth, swaggerUi.serve);
-router.get('/api-docs', checkAuth, swaggerUi.setup(swaggerDocument, swaggerUiOptions));
-
+//router.use('/api-docs', checkAuth, swaggerUi.serve);
+//router.get('/api-docs', checkAuth, swaggerUi.setup(swaggerDocument, swaggerUiOptions));
+router.use('/api-docs', swaggerUi.serve);
+router.get('/api-docs', swaggerUi.setup(swaggerDocument, swaggerUiOptions));
 module.exports = router;
