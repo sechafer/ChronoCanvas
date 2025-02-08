@@ -10,7 +10,7 @@ const logMiddleware = (req, res, next) => {
 
 router.use(logMiddleware);
 
-// Ruta de inicio de autenticación GitHub actualizada
+// Ruta de inicio de autenticación GitHub
 router.get('/auth/github', 
     (req, res, next) => {
         console.log('Iniciando autenticación con GitHub');
@@ -21,33 +21,40 @@ router.get('/auth/github',
     })
 );
 
-// Ruta de callback de GitHub actualizada
-router.get('/auth/github/callback', 
+// Ruta de callback de GitHub
+router.get('/auth/github/callback',
     passport.authenticate('github', { 
         failureRedirect: '/',
         session: true
     }),
-    (req, res) => {
-        console.log('Autenticación exitosa, usuario:', req.user);
-        if (req.user) {
+    async (req, res) => {
+        try {
+            console.log('Callback de GitHub ejecutado, usuario:', req.user);
+            
+            if (!req.user) {
+                console.log('No se recibió usuario en callback');
+                return res.redirect(`${process.env.FRONTEND_URL}?error=auth_failed`);
+            }
+
             const token = generateToken(req.user);
             req.session.token = token;
             req.session.user = req.user;
-            
+
             // Verificar el tipo de respuesta esperada
             const acceptHeader = req.headers.accept || '';
             if (acceptHeader.includes('application/json')) {
-                res.json({
+                return res.json({
+                    success: true,
                     token,
                     user: req.user
                 });
-            } else {
-                // Redirigir a la documentación
-                res.redirect('/api-docs');
             }
-        } else {
-            console.log('No se recibió usuario en callback');
-            res.redirect('/');
+
+            // Redirigir a la documentación de la API
+            res.redirect(`${process.env.BASE_URL}/api-docs`);
+        } catch (error) {
+            console.error('Error en callback:', error);
+            res.redirect(`${process.env.FRONTEND_URL}?error=server_error`);
         }
     }
 );
@@ -86,7 +93,7 @@ router.use('/users', verifyToken, require('./users'));
 // Manejo de rutas no encontradas
 router.use('*', (req, res) => {
     console.log('Ruta no encontrada:', req.originalUrl);
-    res.status(404).redirect('/');
+    res.status(404).json({ message: 'Ruta no encontrada' });
 });
 
 module.exports = router;
