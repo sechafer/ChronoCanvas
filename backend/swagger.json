@@ -44,7 +44,7 @@
     "/ldsChurchHistory/{id}": {
       "get": {
         "tags": [
-          "LDS_Church_History"
+          "Church_History"
         ],
         "description": "",
         "parameters": [
@@ -69,7 +69,7 @@
       },
       "put": {
         "tags": [
-          "LDS_Church_History"
+          "Church_History"
         ],
         "description": "",
         "parameters": [
@@ -115,7 +115,7 @@
       },
       "delete": {
         "tags": [
-          "LDS_Church_History"
+          "Church_History"
         ],
         "description": "",
         "parameters": [
@@ -145,7 +145,7 @@
     "/ldsChurchHistory/": {
       "get": {
         "tags": [
-          "LDS_Church_History"
+          "Church_History"
         ],
         "description": "",
         "responses": {
@@ -159,7 +159,7 @@
       },
       "post": {
         "tags": [
-          "LDS_Church_History"
+          "Church_History"
         ],
         "description": "",
         "parameters": [

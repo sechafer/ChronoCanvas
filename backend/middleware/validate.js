@@ -1,7 +1,7 @@
 const validator = require('../helpers/validate');
 const Joi = require('joi');
 
-// Validation for LDS_Church_History collection
+// Validation for Church_History collection
 const saveChurchHistory = (req, res, next) => {
   const validationRule = {
     title: 'required|min:1|max:100|string',
