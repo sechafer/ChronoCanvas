@@ -7,29 +7,28 @@ dotenv.config();
 
 let database;
 
-const intDb = (callback) => {
+const intDb = async (callback) => {
   if (database) {
     console.warn('DB is already initialized!');
     return callback(null, database);
   }
-  MongoClient.connect(process.env.MONGODB_URL)
-    .then((client) => {
-      database = client;
-    })
-    .catch((err) => {
-      callback(err);
-    });
-  return callback(null, database);
+
+  try {
+    const client = await MongoClient.connect(process.env.MONGODB_URL);
+    database = client.db(); // Agregamos .db() para obtener la instancia correcta
+    console.log("✅ MongoDB connected successfully");
+    callback(null, database);
+  } catch (err) {
+    console.error("❌ Error connecting to MongoDB:", err);
+    callback(err);
+  }
 };
 
 const getDatabase = () => {
   if (!database) {
-    throw Error('Database is not initialized');
+    throw Error('❌ Database is not initialized');
   }
   return database;
 };
 
-module.exports = {
-  intDb,
-  getDatabase,
-};
+module.exports = { intDb, getDatabase };
