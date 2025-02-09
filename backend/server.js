@@ -7,6 +7,8 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const MongoStore = require('connect-mongo');
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger-output.json');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -166,4 +168,6 @@ app.listen(port, () => {
     console.log('Variables de entorno verificadas correctamente');
 });
 
+// Después de crear tu app Express
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 module.exports = app;
