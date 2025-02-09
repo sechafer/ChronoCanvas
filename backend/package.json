@@ -178,6 +178,7 @@
     "minimist": "^1.2.8",
     "mongodb": "^6.8.0",
     "mongodb-connection-string-url": "^3.0.0",
+    "mongoose": "^8.10.0",
     "ms": "^2.0.0",
     "natural-compare": "^1.4.0",
     "negotiator": "^0.6.3",

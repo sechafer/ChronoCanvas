@@ -83,6 +83,14 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
+// Conectar a la base de datos antes de manejar la autenticación
+mongodb.intDb((err) => {
+    if (err) {
+        console.error('Error al conectar con la base de datos:', err);
+        process.exit(1);
+    }
+});
+
 // Configuración de Passport con GitHub
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
@@ -99,7 +107,7 @@ passport.use(new GitHubStrategy({
             authType: 'github'
         };
 
-        const db = mongodb.getDatabase().db();
+        const db = mongodb.getDatabase();
         let existingUser = await db.collection('users').findOne({ githubId: profile.id });
 
         if (!existingUser) {
@@ -152,17 +160,10 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar servidor
-mongodb.intDb((err) => {
-    if (err) {
-        console.error('Error al conectar con la base de datos:', err);
-        process.exit(1);
-    } else {
-        app.listen(port, () => {
-            console.log(`Servidor ejecutándose en el puerto ${port}`);
-            console.log(`URL base: ${baseUrl}`);
-            console.log('Variables de entorno verificadas correctamente');
-        });
-    }
+app.listen(port, () => {
+    console.log(`Servidor ejecutándose en el puerto ${port}`);
+    console.log(`URL base: ${baseUrl}`);
+    console.log('Variables de entorno verificadas correctamente');
 });
 
 module.exports = app;
