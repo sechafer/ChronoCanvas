@@ -81,6 +81,7 @@ router.get('/auth/logout', (req, res) => {
 });
 
 
+
 // ✅ Registro de usuarios y autenticación desde `auth.js`
 router.use('/auth', require('./auth'));  // 👈 Aquí se incluyen las rutas /auth/register, /auth/login, /auth/verify
 
@@ -89,9 +90,9 @@ router.use('/auth', require('./auth'));  // 👈 Aquí se incluyen las rutas /au
 router.use('/swagger', require('./swagger'));
 
 // ✅ Mantener autenticación con JWT y GitHub para rutas protegidas
-router.use('/ldsChurchHistory', verifyToken, require('./ldsChurchHistory'));
-router.use('/templeDedications', verifyToken, require('./templeDedications'));
-router.use('/users', verifyToken, require('./users'));
+router.use('/ldsChurchHistory', require('./ldsChurchHistory'));
+router.use('/templeDedications', require('./templeDedications'));
+router.use('/users', require('./users'));
 
 // ✅ Agregar mensaje en `GET /auth/login`
 router.get('/auth/login', (req, res) => {
