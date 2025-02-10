@@ -54,7 +54,7 @@ router.get('/auth/github/callback',
 );
 
 // ✅ Ruta para obtener el token
-router.get('/auth/token', verifyToken, (req, res) => {
+router.get('/auth/login', verifyToken, (req, res) => {
     if (req.session && req.session.token) {
         res.json({
             token: req.session.token,
