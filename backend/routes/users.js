@@ -5,7 +5,7 @@ const { isAuthenticated } = require('../middleware/authenticate.js');
 const { verifyToken } = require('../middleware/auth.js'); // Importamos el middleware de JWT
 
 router.get('/:id', isAuthenticated,verifyToken, validation.checkMongoId, usersController.getSingle);
-router.get('/', isAuthenticated,verifyToken, usersController.getAll);
+router.get('/', isAuthenticated, usersController.getAll);
 router.post('/', isAuthenticated,verifyToken, validation.saveUser, usersController.createUser);
 router.put('/:id', isAuthenticated,verifyToken, validation.checkMongoId, validation.saveUser, usersController.updateUser);
 router.delete('/:id', isAuthenticated,verifyToken, validation.checkMongoId, usersController.deleteUser);
