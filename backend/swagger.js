@@ -5,8 +5,8 @@ const doc = {
     title: 'ChronoCanvas API',
     description: 'API Documentation for ChronoCanvas'
   },
-  host: 'localhost:3001', // Ajusta esto según tu puerto
-  schemes: ['http', 'https']
+  host: 'chronocanvas-api.onrender.com', // Ajusta esto según tu puerto
+  schemes: ['https']
 };
 
 const outputFile = './swagger-output.json';

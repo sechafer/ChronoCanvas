@@ -5,10 +5,9 @@
     "description": "API Documentation for ChronoCanvas",
     "version": "1.0.0"
   },
-  "host": "localhost:3001",
+  "host": "chronocanvas-api.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http",
     "https"
   ],
   "paths": {
