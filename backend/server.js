@@ -13,6 +13,14 @@ const swaggerFile = require('./swagger-output.json');
 // Cargar variables de entorno
 dotenv.config();
 
+// Conectar a la base de datos antes de manejar la autenticación
+mongodb.initDb((err) => {
+    if (err) {
+        console.error('Error al conectar con la base de datos:', err);
+        process.exit(1);
+    }
+});
+
 const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
 
 // Verificación de variables de entorno
@@ -85,13 +93,7 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-// Conectar a la base de datos antes de manejar la autenticación
-mongodb.intDb((err) => {
-    if (err) {
-        console.error('Error al conectar con la base de datos:', err);
-        process.exit(1);
-    }
-});
+
 
 // Configuración de Passport con GitHub
 passport.use(new GitHubStrategy({

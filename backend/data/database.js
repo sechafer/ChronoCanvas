@@ -7,7 +7,7 @@ dotenv.config();
 
 let database;
 
-const intDb = async (callback) => {
+const initDb = async (callback) => {
   if (database) {
     console.warn('DB is already initialized!');
     return callback(null, database);
@@ -31,4 +31,4 @@ const getDatabase = () => {
   return database;
 };
 
-module.exports = { intDb, getDatabase };
+module.exports = { initDb, getDatabase };
