@@ -3,9 +3,8 @@ const bcrypt = require('bcryptjs');
 const { generateToken, verifyToken } = require('../middleware/auth.js');
 const mongodb = require('../data/database');
 const validation = require('../middleware/validate');
-
 // Registro (ruta pública)
-Router.post('/register', validation.saveUser, async (req, res) => {
+Router.post('/register', validation.saveUser, async (req, res) => {  // 👈 Corregido aquí
     const { firstName, lastName, email, password, birthDate } = req.body;
     
     try {
@@ -44,7 +43,7 @@ Router.post('/register', validation.saveUser, async (req, res) => {
 });
 
 // Login con JWT
-Router.post('/login', async (req, res) => {
+Router.post('auth/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await mongodb.getDatabase().db().collection('users').findOne({ email });

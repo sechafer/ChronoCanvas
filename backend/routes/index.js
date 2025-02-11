@@ -94,10 +94,7 @@ router.use('/ldsChurchHistory', require('./ldsChurchHistory.js'));
 router.use('/templeDedications', require('./templeDedications.js'));
 router.use('/users', require('./users.js'));
 
-// ✅ Agregar mensaje en `GET /auth/login`
-router.get('/auth/login', (req, res) => {
-    res.json({ message: "Usa POST /auth/login para iniciar sesión" });
-});
+
 
 // ✅ Manejo de rutas no encontradas (para evitar 404)
 router.use('*', (req, res) => {
