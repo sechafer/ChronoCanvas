@@ -34,21 +34,10 @@ const getSingle = async (req, res) => {
       const userId = new ObjectId(req.params.id);
       const db = mongodb.getDatabase();
 
-      // Buscar el usuario
+      // Buscar el usuario excluyendo solo el password
       const user = await db.collection('users').findOne(
           { _id: userId },
-          { 
-              projection: { 
-                  password: 0,
-                  // Aseguramos que se retornen todos los campos necesarios
-                  firstName: 1,
-                  lastName: 1,
-                  email: 1,
-                  birthDate: 1,
-                  createdAt: 1,
-                  updatedAt: 1
-              } 
-          }
+          { projection: { password: 0 } }
       );
 
       // Validación si el usuario no existe
