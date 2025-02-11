@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const mongodb = require('../data/database');
+const bcrypt = require('bcryptjs');
 
 // Función auxiliar para formatear fechas
 const formatDate = (date) => {
@@ -20,6 +21,7 @@ const formatUserDates = (user) => {
 };
 
 const getSingle = async (req, res) => {
+  //#swagger.tags=['Users']
     try {
         const userId = new ObjectId(req.params.id);
         const result = await mongodb.getDatabase().db().collection('users').findOne(
@@ -48,6 +50,7 @@ const getSingle = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
+  //#swagger.tags=['Users']
     try {
         const db = mongodb.getDatabase();
         const users = await db.collection('users').find(
@@ -72,6 +75,7 @@ const getAll = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
+  //#swagger.tags=['Users']
     try {
         const newUser = {
             firstName: req.body.firstName,
@@ -108,73 +112,95 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    try {
-        const userId = new ObjectId(req.params.id);
-        const updatedUser = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            birthDate: new Date(req.body.birthDate),
-            updatedAt: new Date()
-        };
+  //#swagger.tags=['Users']
+  try {
+      const db = mongodb.getDatabase();
+      const userId = new ObjectId(req.params.id);
+      const updatedUser = {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email,
+          birthDate: new Date(req.body.birthDate),
+          updatedAt: new Date()
+      };
 
-        if (req.body.password) {
-            updatedUser.password = req.body.password;
-        }
+      // Si se proporciona password, hashearlo antes de guardar
+      if (req.body.password) {
+          const hashedPassword = await bcrypt.hash(req.body.password, 10);
+          updatedUser.password = hashedPassword;
+      }
 
-        const result = await mongodb.getDatabase().db().collection('users').updateOne(
-            { _id: userId },
-            { $set: updatedUser }
-        );
+      const result = await db.collection('users').updateOne(
+          { _id: userId },
+          { $set: updatedUser }
+      );
 
-        if (!result.matchedCount) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado',
-                error: 'user_not_found'
-            });
-        }
+      if (!result.matchedCount) {
+          return res.status(404).json({
+              message: 'Usuario no encontrado',
+              error: 'user_not_found'
+          });
+      }
 
-        const updated = await mongodb.getDatabase().db().collection('users').findOne(
-            { _id: userId },
-            { projection: { password: 0 } }
-        );
+      // Obtener el usuario actualizado (sin el password)
+      const updated = await db.collection('users').findOne(
+          { _id: userId },
+          { projection: { password: 0 } }
+      );
 
-        res.status(200).json({
-            message: 'Usuario actualizado exitosamente',
-            user: formatUserDates(updated)
-        });
-    } catch (error) {
-        console.error('Error en updateUser:', error);
-        res.status(500).json({
-            message: 'Error al actualizar usuario',
-            error: error.message
-        });
-    }
+      res.status(200).json({
+          message: 'Usuario actualizado exitosamente',
+          user: formatUserDates(updated)
+      });
+  } catch (error) {
+      console.error('Error en updateUser:', error);
+      res.status(500).json({
+          message: 'Error al actualizar usuario',
+          error: error.message
+      });
+  }
 };
 
 const deleteUser = async (req, res) => {
-    try {
-        const userId = new ObjectId(req.params.id);
-        const result = await mongodb.getDatabase().db().collection('users').deleteOne({ _id: userId });
+  //#swagger.tags=['Users']
+  try {
+      const db = mongodb.getDatabase();
+      const userId = new ObjectId(req.params.id);
 
-        if (!result.deletedCount) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado',
-                error: 'user_not_found'
-            });
-        }
+      // Primero verificamos si el usuario existe
+      const userExists = await db.collection('users').findOne(
+          { _id: userId },
+          { projection: { _id: 1 } }
+      );
 
-        res.status(200).json({
-            message: 'Usuario eliminado exitosamente',
-            deletedCount: result.deletedCount
-        });
-    } catch (error) {
-        console.error('Error en deleteUser:', error);
-        res.status(500).json({
-            message: 'Error al eliminar usuario',
-            error: error.message
-        });
-    }
+      if (!userExists) {
+          return res.status(404).json({
+              message: 'Usuario no encontrado',
+              error: 'user_not_found'
+          });
+      }
+
+      // Procedemos con la eliminación
+      const result = await db.collection('users').deleteOne({ _id: userId });
+
+      if (!result.deletedCount) {
+          return res.status(500).json({
+              message: 'Error al eliminar usuario',
+              error: 'delete_failed'
+          });
+      }
+
+      res.status(200).json({
+          message: 'Usuario eliminado exitosamente',
+          deletedId: userId.toString()
+      });
+  } catch (error) {
+      console.error('Error en deleteUser:', error);
+      res.status(500).json({
+          message: 'Error al eliminar usuario',
+          error: error.message
+      });
+  }
 };
 
 module.exports = {
