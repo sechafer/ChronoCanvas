@@ -13,15 +13,8 @@ const swaggerFile = require('./swagger-output.json');
 // Cargar variables de entorno
 dotenv.config();
 
-// Conectar a la base de datos antes de manejar la autenticación
-mongodb.initDb((err) => {
-    if (err) {
-        console.error('Error al conectar con la base de datos:', err);
-        process.exit(1);
-    }
-});
-
 const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
+const port = process.env.PORT || 8080;
 
 // Verificación de variables de entorno
 const checkRequiredEnvVars = () => {
@@ -44,7 +37,6 @@ const checkRequiredEnvVars = () => {
 checkRequiredEnvVars();
 
 const app = express();
-const port = process.env.PORT || 8080;
 
 // Configuración de CORS
 const corsOptions = {
@@ -93,8 +85,6 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-
-
 // Configuración de Passport con GitHub
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
@@ -140,6 +130,9 @@ app.use('/api-docs', preventCache);
 // Rutas
 app.use('/', require('./routes'));
 
+// Documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
 // Manejo de errores mejorado
 app.use((err, req, res, next) => {
     console.error('Error detallado:', {
@@ -163,13 +156,30 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Iniciar servidor
-app.listen(port, () => {
-    console.log(`Servidor ejecutándose en el puerto ${port}`);
-    console.log(`URL base: ${baseUrl}`);
-    console.log('Variables de entorno verificadas correctamente');
-});
+// Inicializar la base de datos y luego iniciar el servidor
+const startServer = async () => {
+    try {
+        // Esperar a que la base de datos se inicialice
+        await new Promise((resolve, reject) => {
+            mongodb.initDb((err, db) => {
+                if (err) reject(err);
+                else resolve(db);
+            });
+        });
 
-// Después de crear tu app Express
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+        // Una vez que la base de datos está conectada, iniciar el servidor
+        app.listen(port, () => {
+            console.log(`✅ Servidor ejecutándose en el puerto ${port}`);
+            console.log(`✅ URL base: ${baseUrl}`);
+            console.log('✅ Variables de entorno verificadas correctamente');
+        });
+    } catch (error) {
+        console.error('❌ Error al iniciar el servidor:', error);
+        process.exit(1);
+    }
+};
+
+// Iniciar el servidor
+startServer();
+
 module.exports = app;
