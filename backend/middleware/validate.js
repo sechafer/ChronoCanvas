@@ -4,13 +4,10 @@ const Joi = require('joi');
 // Validation for Church_History collection
 const saveChurchHistory = (req, res, next) => {
   const validationRule = {
-    title: 'required|min:1|max:100|string',
-    description: 'required|min:1|max:500|string',
-    dateRange: {
-      start: ['required', 'regex:/^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/'],
-      end: ['required', 'regex:/^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/']
-    }
-  };
+    event_name: 'required|string|min:3|max:100',
+    event_date: ['required', 'regex:/^(17|18|19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/'],
+    description: 'required|string|min:10|max:1000'
+};
   validator(req.body, validationRule, {}, (err, status) => {
     if (!status) {
       res.status(412).send({

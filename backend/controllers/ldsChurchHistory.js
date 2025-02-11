@@ -50,87 +50,93 @@ const getAll = async (req, res) => {
 };
 
 const createHistory = async (req, res) => {
-    //#swagger.tags=['Church_History']
-    try {
-        const { title, description, dateRange } = req.body;
-        
-        const newHistory = {
-            title,
-            description,
-            dateRange,
-            createdAt: new Date(),
-            createdBy: req.user?.id || 'system'
-        };
+  //#swagger.tags=['Church_History']
+  try {
+      const { event_name, event_date, description } = req.body;
+      
+      const newHistory = {
+          event_name,
+          event_date,
+          description,
+          createdAt: new Date(),
+          createdBy: req.user?.id || 'system'
+      };
 
-        const db = mongodb.getDatabase();
-        const result = await db.collection('Church_History').insertOne(newHistory);
+      const db = mongodb.getDatabase();
+      const result = await db.collection('Church_History').insertOne(newHistory);
 
-        if (!result.acknowledged) {
-            return res.status(500).json({
-                message: 'Error al crear el registro histórico',
-                error: 'insert_failed'
-            });
-        }
+      if (!result.acknowledged) {
+          return res.status(500).json({
+              message: 'Error al crear el registro histórico',
+              error: 'insert_failed'
+          });
+      }
 
-        res.status(201).json({
-            message: 'Registro histórico creado exitosamente',
-            id: result.insertedId,
-            data: newHistory
-        });
-    } catch (error) {
-        console.error('Error en createHistory:', error);
-        res.status(500).json({
-            message: 'Error al crear el registro histórico',
-            error: error.message
-        });
-    }
+      res.status(201).json({
+          message: 'Registro histórico creado exitosamente',
+          id: result.insertedId,
+          data: newHistory
+      });
+  } catch (error) {
+      console.error('Error en createHistory:', error);
+      res.status(500).json({
+          message: 'Error al crear el registro histórico',
+          error: error.message
+      });
+  }
 };
 
 const updateHistory = async (req, res) => {
-    //#swagger.tags=['Church_History']
-    try {
-        const historyId = new ObjectId(req.params.id);
-        const { title, description, dateRange } = req.body;
+  //#swagger.tags=['Church_History']
+  try {
+      // Validación del ID
+      if (!req.params.id || !ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({
+              message: 'ID de registro inválido',
+              error: 'invalid_history_id'
+          });
+      }
 
-        const updatedHistory = {
-            title,
-            description,
-            dateRange,
-            updatedAt: new Date(),
-            updatedBy: req.user?.id || 'system'
-        };
+      const historyId = new ObjectId(req.params.id);
+      const { event_name, event_date, description } = req.body;
 
-        const db = mongodb.getDatabase();
-        const result = await db.collection('Church_History').updateOne(
-            { _id: historyId },
-            { $set: updatedHistory }
-        );
+      const updatedHistory = {
+          event_name,
+          event_date,
+          description,
+          updatedAt: new Date(),
+          updatedBy: req.user?.id || 'system'
+      };
 
-        if (!result.matchedCount) {
-            return res.status(404).json({
-                message: 'Registro histórico no encontrado',
-                error: 'not_found'
-            });
-        }
+      const db = mongodb.getDatabase();
+      const result = await db.collection('Church_History').updateOne(
+          { _id: historyId },
+          { $set: updatedHistory }
+      );
 
-        if (!result.modifiedCount) {
-            return res.status(400).json({
-                message: 'No se realizaron cambios en el registro',
-                error: 'no_changes'
-            });
-        }
+      if (!result.matchedCount) {
+          return res.status(404).json({
+              message: 'Registro histórico no encontrado',
+              error: 'not_found'
+          });
+      }
 
-        res.status(200).json({
-            message: 'Registro histórico actualizado exitosamente',
-            modifiedCount: result.modifiedCount
-        });
-    } catch (error) {
-        console.error('Error en updateHistory:', error);
-        res.status(500).json({
-            message: 'Error al actualizar el registro histórico',
-            error: error.message
-        });
-    }
+      // Obtener el documento actualizado para devolverlo en la respuesta
+      const updatedDocument = await db.collection('Church_History').findOne(
+          { _id: historyId }
+      );
+
+      res.status(200).json({
+          message: 'Registro histórico actualizado exitosamente',
+          data: updatedDocument
+      });
+  } catch (error) {
+      console.error('Error en updateHistory:', error);
+      res.status(500).json({
+          message: 'Error al actualizar el registro histórico',
+          error: error.message
+      });
+  }
 };
 
 const deleteHistory = async (req, res) => {
