@@ -81,21 +81,61 @@ Router.post('/register', validation.saveUser, async (req, res) => {
 // Login con JWT
 Router.post('/login', async (req, res) => {
     const { email, password } = req.body;
+    
     try {
-        const user = await mongodb.getDatabase().db().collection('users').findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'Credenciales inválidas' });
+        // Validación básica
+        if (!email || !password) {
+            return res.status(400).json({ 
+                message: 'Email y contraseña son requeridos',
+                error: 'missing_credentials'
+            });
         }
 
+        // Obtener la base de datos
+        const db = mongodb.getDatabase();
+        if (!db) {
+            console.error("Error de conexión a la base de datos");
+            return res.status(500).json({ 
+                message: 'Error de conexión a la base de datos',
+                error: 'database_connection_failed'
+            });
+        }
+
+        // Buscar usuario
+        const user = await db.collection('users').findOne({ email });
+        if (!user) {
+            return res.status(401).json({ 
+                message: 'Credenciales inválidas',
+                error: 'invalid_credentials'
+            });
+        }
+
+        // Verificar contraseña
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            return res.status(401).json({ message: 'Credenciales inválidas' });
+            return res.status(401).json({ 
+                message: 'Credenciales inválidas',
+                error: 'invalid_credentials'
+            });
         }
 
+        // Generar token
         const token = generateToken(user);
-        req.session.user = user;
-        req.session.token = token;
+        
+        // Establecer sesión
+        if (req.session) {
+            req.session.user = {
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            };
+            req.session.token = token;
+        }
+
+        // Respuesta exitosa
         res.status(200).json({ 
+            message: 'Login exitoso',
             token,
             user: {
                 id: user._id,
@@ -104,9 +144,13 @@ Router.post('/login', async (req, res) => {
                 email: user.email
             }
         });
+
     } catch (error) {
-        console.error("Error en login:", error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        console.error("Error detallado en login:", error);
+        res.status(500).json({ 
+            message: 'Error interno del servidor',
+            error: error.message 
+        });
     }
 });
 
