@@ -1,8 +1,8 @@
 const Router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const { generateToken, verifyToken } = require('../middleware/auth.js');
-const mongodb = require('../data/database');
-const validation = require('../middleware/validate');
+const mongodb = require('../data/database.js');
+const validation = require('../middleware/validate.js');
 // Registro (ruta pública)
 Router.post('/register', validation.saveUser, async (req, res) => {  // 👈 Corregido aquí
     const { firstName, lastName, email, password, birthDate } = req.body;

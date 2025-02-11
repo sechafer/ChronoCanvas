@@ -47,11 +47,19 @@ const saveTempleDedication = (req, res, next) => {
 // Validation for users collection
 const saveUser = (req, res, next) => {
   const validationRule = {
+    //firstName: 'required|min:1|max:50|string',
+    //lastName: 'required|min:1|max:50|string',
+    //birthDate: ['required', 'regex:/^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/'],
+    //email: ['required', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/'],
+   // password: 'required|min:8|max:50|string'
     firstName: 'required|min:1|max:50|string',
     lastName: 'required|min:1|max:50|string',
-    birthDate: ['required', 'regex:/^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/'],
-    email: ['required', 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/'],
+    birthDate: 'required|min:1|max:50|string',
+    email: 'required|min:1|max:80|string',
     password: 'required|min:8|max:50|string'
+
+
+    
   };
   validator(req.body, validationRule, {}, (err, status) => {
     if (!status) {
