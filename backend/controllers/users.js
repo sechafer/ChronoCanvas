@@ -1,23 +1,43 @@
 const { ObjectId } = require('mongodb');
 const mongodb = require('../data/database');
 
+// Función auxiliar para formatear fechas
+const formatDate = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`;
+};
+
+// Función para formatear las fechas en un objeto usuario
+const formatUserDates = (user) => {
+    if (!user) return null;
+    return {
+        ...user,
+        birthDate: formatDate(user.birthDate),
+        createdAt: formatDate(user.createdAt),
+        updatedAt: user.updatedAt ? formatDate(user.updatedAt) : undefined
+    };
+};
+
 const getSingle = async (req, res) => {
-    //#swagger.tags=['users']
     try {
         const userId = new ObjectId(req.params.id);
         const result = await mongodb.getDatabase().db().collection('users').findOne(
             { _id: userId },
-            { projection: { password: 0, authType: 0 } }
+            { projection: { password: 0 } }
         );
-        
+
         if (!result) {
             return res.status(404).json({
                 message: 'Usuario no encontrado',
                 error: 'user_not_found'
             });
         }
-        
-        res.status(200).json(result);
+
+        res.status(200).json({
+            message: 'Usuario encontrado exitosamente',
+            user: formatUserDates(result)
+        });
     } catch (error) {
         console.error('Error en getSingle:', error);
         res.status(500).json({
@@ -28,53 +48,23 @@ const getSingle = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    //#swagger.tags=['users']
     try {
         const db = mongodb.getDatabase();
-        if (!db) {
-            console.error('Error: Database connection not initialized');
-            return res.status(500).json({
-                message: 'Error de conexión a la base de datos',
-                error: 'database_not_initialized'
-            });
-        }
+        const users = await db.collection('users').find(
+            {},
+            { projection: { password: 0 } }
+        ).toArray();
 
-        // Intentar acceder a la colección users con timeout
-        const result = await Promise.race([
-            db.collection('users').find({}, {
-                projection: {
-                    password: 0,
-                    authType: 0
-                }
-            }).toArray(),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Database timeout')), 5000)
-            )
-        ]);
+        const formattedUsers = users.map(formatUserDates);
 
-        if (!result || result.length === 0) {
-            return res.status(200).json({
-                message: 'No se encontraron usuarios',
-                users: []
-            });
-        }
-
-        return res.status(200).json({
+        res.status(200).json({
             message: 'Usuarios recuperados exitosamente',
-            users: result
+            users: formattedUsers,
+            count: users.length
         });
-
     } catch (error) {
         console.error('Error en getAll:', error);
-        
-        if (error.message === 'Database timeout') {
-            return res.status(504).json({
-                message: 'Tiempo de espera agotado al conectar con la base de datos',
-                error: 'database_timeout'
-            });
-        }
-
-        return res.status(500).json({
+        res.status(500).json({
             message: 'Error al obtener usuarios',
             error: error.message
         });
@@ -82,29 +72,31 @@ const getAll = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-    //#swagger.tags=['users']
     try {
         const newUser = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            birthDate: new Date(req.body.birthDate),
             email: req.body.email,
             password: req.body.password,
+            birthDate: new Date(req.body.birthDate),
             createdAt: new Date()
         };
 
         const result = await mongodb.getDatabase().db().collection('users').insertOne(newUser);
-        
+
         if (!result.acknowledged) {
-            return res.status(500).json({ 
+            return res.status(500).json({
                 message: 'Error al crear usuario',
-                error: 'insert_failed' 
+                error: 'insert_failed'
             });
         }
 
+        const createdUser = { ...newUser, _id: result.insertedId };
+        delete createdUser.password; // No devolver el password
+
         res.status(201).json({
             message: 'Usuario creado exitosamente',
-            userId: result.insertedId
+            user: formatUserDates(createdUser)
         });
     } catch (error) {
         console.error('Error en createUser:', error);
@@ -116,33 +108,40 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    //#swagger.tags=['users']
     try {
         const userId = new ObjectId(req.params.id);
         const updatedUser = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            birthDate: new Date(req.body.birthDate),
             email: req.body.email,
-            password: req.body.password,
+            birthDate: new Date(req.body.birthDate),
             updatedAt: new Date()
         };
+
+        if (req.body.password) {
+            updatedUser.password = req.body.password;
+        }
 
         const result = await mongodb.getDatabase().db().collection('users').updateOne(
             { _id: userId },
             { $set: updatedUser }
         );
 
-        if (!result.modifiedCount) {
+        if (!result.matchedCount) {
             return res.status(404).json({
-                message: 'Usuario no encontrado o no se realizaron cambios',
-                error: 'update_failed'
+                message: 'Usuario no encontrado',
+                error: 'user_not_found'
             });
         }
 
+        const updated = await mongodb.getDatabase().db().collection('users').findOne(
+            { _id: userId },
+            { projection: { password: 0 } }
+        );
+
         res.status(200).json({
             message: 'Usuario actualizado exitosamente',
-            modifiedCount: result.modifiedCount
+            user: formatUserDates(updated)
         });
     } catch (error) {
         console.error('Error en updateUser:', error);
@@ -154,7 +153,6 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-    //#swagger.tags=['users']
     try {
         const userId = new ObjectId(req.params.id);
         const result = await mongodb.getDatabase().db().collection('users').deleteOne({ _id: userId });
@@ -162,7 +160,7 @@ const deleteUser = async (req, res) => {
         if (!result.deletedCount) {
             return res.status(404).json({
                 message: 'Usuario no encontrado',
-                error: 'delete_failed'
+                error: 'user_not_found'
             });
         }
 
