@@ -22,31 +22,55 @@ const formatUserDates = (user) => {
 
 const getSingle = async (req, res) => {
   //#swagger.tags=['Users']
-    try {
-        const userId = new ObjectId(req.params.id);
-        const result = await mongodb.getDatabase().db().collection('users').findOne(
-            { _id: userId },
-            { projection: { password: 0 } }
-        );
+  try {
+      // Validación del ID
+      if (!req.params.id || !ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({
+              message: 'ID de usuario inválido',
+              error: 'invalid_user_id'
+          });
+      }
 
-        if (!result) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado',
-                error: 'user_not_found'
-            });
-        }
+      const userId = new ObjectId(req.params.id);
+      const db = mongodb.getDatabase();
 
-        res.status(200).json({
-            message: 'Usuario encontrado exitosamente',
-            user: formatUserDates(result)
-        });
-    } catch (error) {
-        console.error('Error en getSingle:', error);
-        res.status(500).json({
-            message: 'Error al obtener usuario',
-            error: error.message
-        });
-    }
+      // Buscar el usuario
+      const user = await db.collection('users').findOne(
+          { _id: userId },
+          { 
+              projection: { 
+                  password: 0,
+                  // Aseguramos que se retornen todos los campos necesarios
+                  firstName: 1,
+                  lastName: 1,
+                  email: 1,
+                  birthDate: 1,
+                  createdAt: 1,
+                  updatedAt: 1
+              } 
+          }
+      );
+
+      // Validación si el usuario no existe
+      if (!user) {
+          return res.status(404).json({
+              message: 'Usuario no encontrado',
+              error: 'user_not_found'
+          });
+      }
+
+      // Retornar usuario con fechas formateadas
+      res.status(200).json({
+          message: 'Usuario encontrado exitosamente',
+          user: formatUserDates(user)
+      });
+  } catch (error) {
+      console.error('Error en getSingle:', error);
+      res.status(500).json({
+          message: 'Error al obtener usuario',
+          error: error.message || 'internal_server_error'
+      });
+  }
 };
 
 const getAll = async (req, res) => {
