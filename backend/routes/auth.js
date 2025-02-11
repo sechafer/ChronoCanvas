@@ -43,7 +43,7 @@ Router.post('/register', validation.saveUser, async (req, res) => {  // 👈 Cor
 });
 
 // Login con JWT
-Router.post('auth/login', async (req, res) => {
+Router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await mongodb.getDatabase().db().collection('users').findOne({ email });
