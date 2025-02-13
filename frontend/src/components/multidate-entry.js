@@ -1,24 +1,17 @@
 import React, { useState } from 'react';
 import { Form, InputGroup, Button } from 'react-bootstrap';
 
-export default function DateEntry({ onDateSelect }) {
+export default function MultiDateEntry({ onDateSelect }) {
   const [selectedDate, setSelectedDate] = useState('');
 
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
-  };
-
-  const handleSubmit = () => {
-    if (selectedDate) {
-            const [year, month, day] = selectedDate.split("-");
-            const formattedDate = `${month}/${day}/${year}`;
-            console.log(formattedDate)
-            localStorage.setItem('selectedDate', formattedDate);
-        if (onDateSelect) {
-            onDateSelect(formattedDate);
-        }
-    } else {
-        alert('Please select a date before submitting.');
+    const [year, month, day] = e.target.value.split("-");
+    const formattedDate = `${month}/${day}/${year}`;
+    console.log(formattedDate)
+    localStorage.setItem('selectedDate', formattedDate);
+    if (onDateSelect) {
+        onDateSelect(formattedDate);
     }
   };
 
@@ -33,9 +26,6 @@ export default function DateEntry({ onDateSelect }) {
             placeholder="Select a date"
           />
         </InputGroup>
-        <Button className="submit-button" onClick={handleSubmit}>
-          Paint!
-        </Button>
       </div>
     </div>
   );

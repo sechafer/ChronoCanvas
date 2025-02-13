@@ -49,7 +49,7 @@ const PaintApp = () => {
 
   return (
     <>
-    <div className="bg-tangerine w-50 mx-auto rounded-top border-dark border-2 border mt-5 mb-0 fw-bold">
+    <div className="bg-tangerine w-75 mx-auto rounded-top border-dark border-2 border mt-5 mb-0 fw-bold">
       <p className="mb-0">
         Paint Your Own Picture!
       </p>
@@ -97,7 +97,7 @@ const PaintApp = () => {
 
           {/* Clear Button */}
           <button className="btn btn-danger mt-3 mt-md-0 ms-5" onClick={() => setLines([])}>
-            Clear
+            X
           </button>
         </div>
       </div>

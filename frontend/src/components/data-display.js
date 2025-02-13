@@ -8,15 +8,15 @@ import brush2 from "../images/paints/brush2.svg";
 import splat2 from "../images/paints/splat2.svg";
 
 export default function DataDisplay({
-  id, // Accept id as a prop
+  id,
   name,
   title,
   description,
-  descriptionStyle = {}, // Accept descriptionStyle with a default empty object
+  descriptionStyle = {},
 }) {
   const [backgroundColor, setBackgroundColor] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState(null);
-  const [uniqueId, setUniqueId] = useState(id || uuidv4()); // Generate unique ID only if not passed
+  const [uniqueId, setUniqueId] = useState(id || uuidv4());
 
   useEffect(() => {
     if (name) {
@@ -31,36 +31,11 @@ export default function DataDisplay({
 
   const randomTilt = Math.random() > 0.5 ? -10 : 10;
 
-  // Adjust text size dynamically based on background image
-  const textSize =
-    backgroundImage === blob || backgroundImage === brush2
-      ? "2.5rem"
-      : backgroundImage === brush1
-      ? "2rem"
-      : "1.5rem";
-
-  if (!name) {
-    return <div>Loading...</div>;
-  }
-
-  // Default description styles
-  const defaultDescriptionStyle = {
-    fontSize: "12px",
-    top: "80%", // Default vertical position
-    left: "50%", // Center horizontally
-    transform: `translate(-50%, -50%) rotate(${randomTilt}deg)`, // Center and rotate
-    backgroundColor: "rgba(18, 217, 21, .9)", // Semi-transparent background
-    color: "white",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-    width: "170px",
-    textAlign: "center",
-    zIndex: 2,
-  };
-
   return (
     <div
-      id={`data-display-${uniqueId}`} // Ensure unique ID is applied
+      id={`data-display-${uniqueId}`}
       className="d-flex flex-column align-items-center text-center position-relative"
+      style={{ width: "100%" }}
     >
       {/* Brush Stroke Behind Title */}
       <div className="position-relative">
@@ -71,20 +46,22 @@ export default function DataDisplay({
         />
       </div>
 
-      {/* Splat, Blob, or Brush Masked Div */}
+      {/* Responsive Background */}
       <div
         className="d-flex flex-column justify-content-center align-items-center position-relative"
         style={{
-          width: "400px",
-          height: "400px",
-          backgroundColor: `${backgroundColor || "white"}`, // Background color
+          width: "100%", // Full width on smaller screens
+          maxWidth: "350px", // Limit maximum width
+          height: "auto",
+          aspectRatio: "1 / 1", // Ensures it stays square
+          backgroundColor: backgroundColor || "white",
           color: "white",
-          backgroundImage: `url(${backgroundImage})`, // Dynamically set background image
+          backgroundImage: `url(${backgroundImage})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: "80%", // Ensures the image fits within the div
-          backgroundPosition: "center", // Centers the SVG in the div
+          backgroundSize: "contain",
+          backgroundPosition: "center",
           maskImage: `url(${backgroundImage})`,
-          WebkitMaskImage: `url(${backgroundImage})`, // For WebKit browsers
+          WebkitMaskImage: `url(${backgroundImage})`,
           maskRepeat: "no-repeat",
           WebkitMaskRepeat: "no-repeat",
           maskSize: "contain",
@@ -95,12 +72,11 @@ export default function DataDisplay({
         }}
       >
         <span
-          className="mt-3 fw-bold"
+          className="mt-3 fw-bold text-center"
           style={{
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-            fontSize: textSize, // Dynamically set text size
-            width: "30%",
-            display: "block", // Ensure it behaves like a block-level element
+            fontSize: "min(2.5rem, 5vw)", // Scale dynamically
+            width: "80%", // Ensure it fits inside
           }}
         >
           {name}
@@ -112,8 +88,16 @@ export default function DataDisplay({
         <p
           className="position-absolute p-2 rounded"
           style={{
-            ...defaultDescriptionStyle, // Apply default styles
-            ...descriptionStyle, // Override with custom styles (if provided)
+            fontSize: "min(12px, 2vw)", // Scales dynamically
+            top: "80%",
+            left: "50%",
+            transform: `translate(-50%, -50%) rotate(${randomTilt}deg)`,
+            backgroundColor: "rgba(18, 217, 21, .9)",
+            color: "white",
+            textAlign: "center",
+            width: "min(170px, 40vw)",
+            zIndex: 2,
+            ...descriptionStyle,
           }}
         >
           {description}
@@ -122,3 +106,4 @@ export default function DataDisplay({
     </div>
   );
 }
+

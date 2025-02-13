@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DateEntry from "../components/date-entry";
 import { useFetchOnDemand } from "../api-access/get-ai-data-on-demand";
 import DataDisplay from "../components/data-display";
 import LoadingSpinner from "../components/loading-spinner";
 import PaintApp from "../components/paint";
 import SvgDisplay from "../components/svg-display";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaintbrush} from "@fortawesome/free-solid-svg-icons";
 
 export default function Home() {
     const { data, loading, error, setBirthDate } = useFetchOnDemand();
     const [selectedDate, setSelectedDate] = useState(null);
+    const navigate = useNavigate();
 
   /*   const templeData = {
         "_id": { "$oid": "678c545358998ebaa3310944" },
@@ -25,20 +27,41 @@ export default function Home() {
         setBirthDate(date);
     };
 
+    const handleDualDateClick = () => {
+        navigate(`/compare`);
+      };
+
+      const handleLoginClick = () => {
+        navigate(`/login`);
+      };
+
+      const handleRegisterClick = () => {
+        navigate(`/register`);
+      };
+
     useEffect(() => {
         const today = new Date();
         const formattedToday = `${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}/${today.getFullYear()}`;
         setSelectedDate(formattedToday);
         setBirthDate(formattedToday); // Automatically fetch data for today
-    }, [setBirthDate]);
+    }, []);
 
     if (loading) return <LoadingSpinner />;
 
     return (
         <>
-            <h1 className="text-dark fs-italic mt-5 mb-0 text-center">Welcome!</h1>
-            <small className="d-block text-center">Enter your birthday to paint your day!</small>
-            <DateEntry onDateSelect={handleDateSelect} />
+            <div className="bg-tangerine header-background mx-auto rounded">
+                <h1 className="text-light fst-italic fw-bold mt-5 mb-0 text-center">Welcome!</h1>
+                <small className="d-block text-center">Enter your birthday to paint your day!</small>
+            </div>
+            <div className="d-flex align-items-center justify-content-center">
+                <DateEntry onDateSelect={handleDateSelect} />
+                <div className="ms-2 mt-3">
+                    <span className="mx-3 fw-bold fst-italic">OR</span> <Button onClick={handleDualDateClick} className="compare-button">
+                        Compare Dates
+                    </Button>
+                </div>
+            </div>
             
             <Container className="my-5">
                 {error && <p className="text-danger text-center">{error}</p>}
@@ -116,6 +139,15 @@ export default function Home() {
 
                 <PaintApp />
             </Container>
+            <div className="d-flex text-light">
+                <Button className="me-3 text-light" onClick={handleLoginClick}>
+                    Login
+                </Button>
+                <Button className="text-light" onClick={handleRegisterClick}>
+                    Register
+                </Button>
+            </div>
+
         </>
     );
 }
