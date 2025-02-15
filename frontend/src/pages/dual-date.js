@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import MultiDateEntry from "../components/multidate-entry";
 import { useFetchOnDemand } from "../api-access/get-ai-data-on-demand";
+import { useFetchMongoOnDemand } from "../api-access/get-mongo-data-on-demand";
 import DataDisplay from "../components/data-display";
 import LoadingSpinner from "../components/loading-spinner";
 import PaintApp from "../components/paint";
@@ -9,11 +10,20 @@ import SvgDisplay from "../components/svg-display";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaintbrush, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import DataMongoDisplay from "../components/data-mongo-display";
 
 export default function DualDateComparison() {
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate();
+  
+  // Left side Mongo data
+  const { data: leftData1, setEndpoint: setLeftEndpoint1 } = useFetchMongoOnDemand();
+  const { data: leftData2, setEndpoint: setLeftEndpoint2 } = useFetchMongoOnDemand();
 
-  // Left column: state and API hook
+  // Right side Mongo data
+  const { data: rightData1, setEndpoint: setRightEndpoint1 } = useFetchMongoOnDemand();
+  const { data: rightData2, setEndpoint: setRightEndpoint2 } = useFetchMongoOnDemand();
+
+  // Left side: AI data
   const {
     data: leftData,
     loading: leftLoading,
@@ -22,7 +32,7 @@ export default function DualDateComparison() {
   } = useFetchOnDemand();
   const [leftDate, setLeftDate] = useState(null);
 
-  // Right column: state and API hook
+  // Right side: AI data
   const {
     data: rightData,
     loading: rightLoading,
@@ -31,17 +41,8 @@ export default function DualDateComparison() {
   } = useFetchOnDemand();
   const [rightDate, setRightDate] = useState(null);
 
-  // Set today's date on initial render for both sides, but don't trigger API calls.
-  useEffect(() => {
-    const today = new Date();
-    const formattedToday = `${String(today.getMonth() + 1).padStart(2, "0")}/${String(
-      today.getDate()
-    ).padStart(2, "0")}/${today.getFullYear()}`;
-    setLeftDate(formattedToday);
-    setRightDate(formattedToday);
-  }, []);
 
-  // Only trigger API calls when the user clicks the Paint button.
+  // When the user clicks the Paint button, trigger the API calls for AI data.
   const handleSubmit = () => {
     if (leftDate) {
       setLeftBirthDate(leftDate);
@@ -51,13 +52,31 @@ export default function DualDateComparison() {
     }
   };
 
-  // Show a spinner if either side is loading
+  useEffect(() => {
+    if (leftDate) {
+      const [month, day, year] = leftDate.split("/");
+      const formattedLeft = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      setLeftEndpoint1(`ldschurchhistory/public?date=${formattedLeft}`);
+      setLeftEndpoint2(`templeDedications/public?date=${formattedLeft}`);
+    }
+  }, [leftDate, setLeftEndpoint1, setLeftEndpoint2]);
+
+  useEffect(() => {
+    if (rightDate) {
+      const [month, day, year] = rightDate.split("/");
+      const formattedRight = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      setRightEndpoint1(`ldschurchhistory/public?date=${formattedRight}`);
+      setRightEndpoint2(`templeDedications/public?date=${formattedRight}`);
+    }
+  }, [rightDate, setRightEndpoint1, setRightEndpoint2]);
+
+  // Show spinner if either AI data is loading
   if (leftLoading || rightLoading) return <LoadingSpinner />;
 
   return (
     <>
-      {/* Back Button Positioned in Top Left */}
-      <div style={{position: 'absolute', top: '230px', left: '30px'}}>
+      {/* Back Button */}
+      <div style={{ position: "absolute", top: "230px", left: "30px" }}>
         <Button onClick={() => navigate("/")} className="text-light fw-bold">
           <FontAwesomeIcon icon={faChevronLeft} className="me-2" /> Back
         </Button>
@@ -72,7 +91,7 @@ export default function DualDateComparison() {
         </small>
       </div>
 
-      {/* Button at the top that triggers handleSubmit */}
+      {/* Paint Button */}
       <div className="text-center mt-3 p-3">
         <Button onClick={handleSubmit} className="submit-button p-3">
           <FontAwesomeIcon icon={faPaintbrush} /> Paint!
@@ -82,7 +101,7 @@ export default function DualDateComparison() {
       <Container className="my-5">
         <Row>
           {/* Left Side */}
-          <Col md={6} className="pr-md-3">
+          <Col md={6} className="border border-dark ps-md-3">
             <MultiDateEntry
               onDateSelect={(date) => {
                 setLeftDate(date);
@@ -125,6 +144,16 @@ export default function DualDateComparison() {
                       description={`Element: ${leftData.chineseZodiacElement}`}
                     />
                   </Col>
+
+                  {/* Mongo Data for Left Date */}
+                  <Col lg={4}>
+                    <DataMongoDisplay
+                      title="Closest Temple Dedication"
+                      name={leftData2?.temple}
+                      description={`Dedicated On: ${leftData2?.dedication} By: ${leftData2?.dedicatedBy}`}
+                      descriptionStyle={{ top: "85%" }}
+                    />
+                  </Col>
                   <Col lg={6}>
                     <DataDisplay
                       title="Birth Flower"
@@ -133,14 +162,25 @@ export default function DualDateComparison() {
                       descriptionStyle={{ top: "90%" }}
                     />
                   </Col>
+                  <Col lg={4}>
+                    <DataMongoDisplay
+                      title="Closest Church History"
+                      name={leftData1?.event_name}
+                      description={`Date: ${leftData1?.event_date} Description: ${leftData1?.description}`}
+                      descriptionStyle={{
+                        top: "120%",
+                        width: "95%",
+                      }}
+                    />
+                  </Col>
                 </Row>
               </>
             )}
             <PaintApp />
           </Col>
 
-          {/* Right Side with a vertical divider */}
-          <Col md={6} className="border-start border-dark ps-md-3">
+          {/* Right Side */}
+          <Col md={6} className="border border-dark ps-md-3">
             <MultiDateEntry
               onDateSelect={(date) => {
                 setRightDate(date);
@@ -183,12 +223,31 @@ export default function DualDateComparison() {
                       description={`Element: ${rightData.chineseZodiacElement}`}
                     />
                   </Col>
+                  <Col lg={4}>
+                    <DataMongoDisplay
+                      title="Closest Temple Dedication"
+                      name={rightData2?.temple}
+                      description={`Dedicated On: ${rightData2?.dedication} By: ${rightData2?.dedicatedBy}`}
+                      descriptionStyle={{ top: "90%" }}
+                    />
+                  </Col>
                   <Col lg={6}>
                     <DataDisplay
                       title="Birth Flower"
                       name={rightData.birthFlower}
                       description={rightData.birthFlowerSymbol}
                       descriptionStyle={{ top: "90%" }}
+                    />
+                  </Col>
+                  <Col lg={4}>
+                    <DataMongoDisplay
+                      title="Closest Church History"
+                      name={rightData1?.event_name}
+                      description={`Date: ${rightData1?.event_date}  Description: ${rightData1?.description}`}
+                      descriptionStyle={{
+                        top: "120%",
+                        width: "95%",
+                      }}
                     />
                   </Col>
                 </Row>

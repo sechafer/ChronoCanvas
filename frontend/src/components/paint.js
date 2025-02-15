@@ -49,7 +49,7 @@ const PaintApp = () => {
 
   return (
     <>
-    <div className="bg-tangerine w-75 mx-auto rounded-top border-dark border-2 border mt-5 mb-0 fw-bold">
+    <div className="bg-tangerine w-75 mx-auto rounded-top border-dark border-2 border mb-0 fw-bold" style={{marginTop: '200px'}}>
       <p className="mb-0">
         Paint Your Own Picture!
       </p>

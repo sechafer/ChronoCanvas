@@ -4,6 +4,8 @@ const validation = require('../middleware/validate.js');
 const { isAuthenticated } = require('../middleware/authenticate.js');
 const { verifyToken } = require('../middleware/auth.js'); // Importamos JWT para protección
 
+
+router.get('/public', historyController.getClosestHistory);
 // Obtener un registro por ID (JWT o Passport)
 router.get('/:id', isAuthenticated, verifyToken, validation.checkMongoId, historyController.getSingle);
 
