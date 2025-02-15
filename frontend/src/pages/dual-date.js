@@ -42,7 +42,6 @@ export default function DualDateComparison() {
   const [rightDate, setRightDate] = useState(null);
 
 
-  // When the user clicks the Paint button, trigger the API calls for AI data.
   const handleSubmit = () => {
     if (leftDate) {
       setLeftBirthDate(leftDate);
@@ -70,7 +69,6 @@ export default function DualDateComparison() {
     }
   }, [rightDate, setRightEndpoint1, setRightEndpoint2]);
 
-  // Show spinner if either AI data is loading
   if (leftLoading || rightLoading) return <LoadingSpinner />;
 
   return (

@@ -1,4 +1,3 @@
-// src/pages/Home.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DateEntry from "../components/date-entry";
@@ -29,12 +28,12 @@ export default function Home() {
     if (captureElement) {
       html2canvas(captureElement, { scale: 2 }).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4"); // Portrait mode, A4 size
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 297; // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Scale height proportionally
+        const pdf = new jsPDF("p", "mm", "a4"); 
+        const imgWidth = 210;
+        const pageHeight = 297; 
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        let position = 0; // Current Y position in the PDF
+        let position = 0; 
 
         // If content is larger than one page, split it into multiple pages
         while (position < imgHeight) {
@@ -42,7 +41,7 @@ export default function Home() {
           position += pageHeight;
 
           if (position < imgHeight) {
-            pdf.addPage(); // Add a new page if content is not fully captured
+            pdf.addPage();
           }
         }
 
@@ -86,7 +85,7 @@ export default function Home() {
       today.getDate()
     ).padStart(2, "0")}/${today.getFullYear()}`;
     setDisplayDate(formattedToday);
-    setBirthDate(formattedToday); // Automatically fetch data for today
+    setBirthDate(formattedToday);
   }, []);
 
   if (loading) return <LoadingSpinner />;
