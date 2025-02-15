@@ -79,8 +79,8 @@ router.use('/auth', require('./auth'));
 router.use('/', require('./swagger'));
 
 // Rutas protegidas
-router.use('/ldsChurchHistory', verifyToken, require('./ldsChurchHistory'));
-router.use('/templeDedications', verifyToken, require('./templeDedications'));
+router.use('/ldsChurchHistory', require('./ldsChurchHistory'));
+router.use('/templeDedications', require('./templeDedications'));
 router.use('/users', verifyToken, require('./users'));
 
 // Manejo de rutas no encontradas

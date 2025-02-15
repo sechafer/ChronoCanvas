@@ -50,12 +50,9 @@ Now respond with the JSON object that I can parse for the provided date: ${birth
     try {
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
-        console.log(result.response.text());
-        console.log("Response Text:", responseText);
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch && jsonMatch[0]) {
             const parsedResult = JSON.parse(jsonMatch[0]); // Parse the matched JSON
-            console.log("Parsed JSON:", parsedResult);
             return parsedResult;
         } else {
             throw new Error("No JSON object found in the response text.");

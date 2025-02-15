@@ -15,7 +15,7 @@ export default function DateEntry({ onDateSelect }) {
             console.log(formattedDate)
             localStorage.setItem('selectedDate', formattedDate);
         if (onDateSelect) {
-            onDateSelect(formattedDate);
+            onDateSelect(formattedDate, selectedDate);
         }
     } else {
         alert('Please select a date before submitting.');

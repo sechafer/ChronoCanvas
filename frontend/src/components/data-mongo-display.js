@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid"; // Import UUID to generate unique IDs
 import BrushStrokeBehindText from "./brushstroke";
-import splat from "../images/paints/splat.svg";
 import blob from "../images/paints/blob.svg";
 import brush1 from "../images/paints/brush1.svg";
 import brush2 from "../images/paints/brush2.svg";
-import splat2 from "../images/paints/splat2.svg";
 
-export default function DataDisplay({
+
+export default function DataMongoDisplay({
   id,
   name,
   title,
@@ -17,23 +16,15 @@ export default function DataDisplay({
   const [backgroundColor, setBackgroundColor] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [uniqueId, setUniqueId] = useState(id || uuidv4());
-  const [fontSize, setFontSize] = useState("min(2.5rem, 5vw)"); // Default font size
 
   useEffect(() => {
     if (name) {
       const randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
       setBackgroundColor(randomColor);
 
-      const backgrounds = [splat, splat2, blob, brush1, brush2];
+      const backgrounds = [blob, brush1, brush2];
       const randomImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
       setBackgroundImage(randomImage);
-
-      // Adjust font size based on selected background
-      if (randomImage === splat) {
-        setFontSize("1.2rem");
-      } else {
-        setFontSize("min(2.5rem, 5vw)"); // Default size
-      }
     }
   }, [name, title]);
 
@@ -83,7 +74,7 @@ export default function DataDisplay({
           className="mt-3 fw-bold text-center"
           style={{
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-            fontSize: fontSize, // Dynamic font size
+            fontSize: "min(1.5rem, 5vw)", // Scale dynamically
             width: "80%", // Ensure it fits inside
           }}
         >
@@ -94,13 +85,13 @@ export default function DataDisplay({
       {/* Description Positioned Separately */}
       {description && (
         <p
-          className="position-absolute p-2 rounded"
+          className="position-absolute p-2 rounded fw-bold mt-5"
           style={{
             fontSize: "min(12px, 2vw)", // Scales dynamically
-            top: "80%",
+            top: "90%",
             left: "50%",
-            transform: `translate(-50%, -50%) rotate(${randomTilt}deg)`,
-            backgroundColor: "rgba(18, 217, 21, .9)",
+            transform: `translate(-50%, -50%)`,
+            backgroundColor: "rgba(11, 108, 13, 0.9)",
             color: "white",
             textAlign: "center",
             width: "min(170px, 40vw)",
@@ -114,3 +105,4 @@ export default function DataDisplay({
     </div>
   );
 }
+
