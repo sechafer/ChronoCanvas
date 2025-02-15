@@ -49,10 +49,10 @@ export default function DataMongoDisplay({
       <div
         className="d-flex flex-column justify-content-center align-items-center position-relative"
         style={{
-          width: "100%", // Full width on smaller screens
-          maxWidth: "350px", // Limit maximum width
+          width: "100%", 
+          maxWidth: "350px",
           height: "auto",
-          aspectRatio: "1 / 1", // Ensures it stays square
+          aspectRatio: "1 / 1", 
           backgroundColor: backgroundColor || "white",
           color: "white",
           backgroundImage: `url(${backgroundImage})`,
@@ -74,8 +74,8 @@ export default function DataMongoDisplay({
           className="mt-3 fw-bold text-center"
           style={{
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-            fontSize: "min(1.5rem, 5vw)", // Scale dynamically
-            width: "80%", // Ensure it fits inside
+            fontSize: "min(1.5rem, 5vw)", 
+            width: "80%", 
           }}
         >
           {name}
@@ -87,7 +87,7 @@ export default function DataMongoDisplay({
         <p
           className="position-absolute p-2 rounded fw-bold mt-5"
           style={{
-            fontSize: "min(12px, 2vw)", // Scales dynamically
+            fontSize: "min(12px, 2vw)", 
             top: "90%",
             left: "50%",
             transform: `translate(-50%, -50%)`,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid"; // Import UUID to generate unique IDs
+import { v4 as uuidv4 } from "uuid";
 import BrushStrokeBehindText from "./brushstroke";
 import splat from "../images/paints/splat.svg";
 import blob from "../images/paints/blob.svg";
@@ -17,7 +17,7 @@ export default function DataDisplay({
   const [backgroundColor, setBackgroundColor] = useState(null);
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [uniqueId, setUniqueId] = useState(id || uuidv4());
-  const [fontSize, setFontSize] = useState("min(2.5rem, 5vw)"); // Default font size
+  const [fontSize, setFontSize] = useState("min(2.5rem, 5vw)");
 
   useEffect(() => {
     if (name) {
@@ -32,7 +32,7 @@ export default function DataDisplay({
       if (randomImage === splat) {
         setFontSize("1.2rem");
       } else {
-        setFontSize("min(2.5rem, 5vw)"); // Default size
+        setFontSize("min(2.5rem, 5vw)");
       }
     }
   }, [name, title]);
@@ -58,10 +58,10 @@ export default function DataDisplay({
       <div
         className="d-flex flex-column justify-content-center align-items-center position-relative"
         style={{
-          width: "100%", // Full width on smaller screens
-          maxWidth: "350px", // Limit maximum width
+          width: "100%", 
+          maxWidth: "350px", 
           height: "auto",
-          aspectRatio: "1 / 1", // Ensures it stays square
+          aspectRatio: "1 / 1", 
           backgroundColor: backgroundColor || "white",
           color: "white",
           backgroundImage: `url(${backgroundImage})`,
@@ -83,8 +83,8 @@ export default function DataDisplay({
           className="mt-3 fw-bold text-center"
           style={{
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-            fontSize: fontSize, // Dynamic font size
-            width: "80%", // Ensure it fits inside
+            fontSize: fontSize, 
+            width: "80%", 
           }}
         >
           {name}

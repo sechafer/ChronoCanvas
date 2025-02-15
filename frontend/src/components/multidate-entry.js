@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, InputGroup, Button } from 'react-bootstrap';
+import { Form, InputGroup } from 'react-bootstrap';
 
 export default function MultiDateEntry({ onDateSelect }) {
   const [selectedDate, setSelectedDate] = useState('');
