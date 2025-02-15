@@ -71,15 +71,6 @@ export default function Home() {
         navigate(`/register`);
       };
 
-      useEffect(() => {
-        //console.log(data1);
-    }, [data1]);
-
-
-    useEffect(() => {
-        //console.log(data2);
-    }, [data2]);
-
     useEffect(() => {
         const date = new Date();
         const year = date.getFullYear();
