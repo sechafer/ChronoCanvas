@@ -16,6 +16,14 @@ router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html')); // Sirve la página estática
 });
 
+
+// Rutas públicas (sin autenticación)
+router.get('/ldsChurchHistory', require('../controllers/ldsChurchHistory').getAll);
+router.get('/ldsChurchHistory/:id', require('../controllers/ldsChurchHistory').getSingle);
+router.get('/templeDedications', require('../controllers/templeDedications').getAll);
+router.get('/templeDedications/:id', require('../controllers/templeDedications').getSingle);
+
+
 // ✅ Ruta de autenticación con GitHub
 router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
