@@ -2,19 +2,15 @@ const swaggerAutogen = require('swagger-autogen')();
 
 const doc = {
   info: {
-    title: 'Contacts API',
-    description: 'Contacts API'
+    title: 'ChronoCanvas API',
+    description: 'API Documentation for ChronoCanvas'
   },
-  host: 'chronocanvas-api.onrender.com',
-  schemes: [
-    'https'
-]
+  host: 'chronocanvas-api.onrender.com', // Ajusta esto según tu puerto
+  schemes: ['https']
 };
 
+//const outputFile = './swagger-output.json';
 const outputFile = './swagger.json';
-const endpointsFile = ['./routes/index.js'];
+const endpointsFiles = ['./server.js']; // Ajusta esto a tu archivo principal
 
-/* NOTE: If you are using the express Router, you must pass in the 'routes' only the 
-root file where the route starts, such as index.js, app.js, routes.js, etc ... */
-
-swaggerAutogen(outputFile, endpointsFile, doc);
+swaggerAutogen(outputFile, endpointsFiles, doc);
