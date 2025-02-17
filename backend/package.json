@@ -41,7 +41,6 @@
     "color-name": "^1.1.4",
     "concat-map": "^0.0.1",
     "confusing-browser-globals": "^1.0.11",
-    "connect-mongo": "^5.1.0",
     "content-disposition": "^0.5.4",
     "content-type": "^1.0.5",
     "cookie": "^0.5.0",
@@ -178,7 +177,6 @@
     "minimist": "^1.2.8",
     "mongodb": "^6.8.0",
     "mongodb-connection-string-url": "^3.0.0",
-    "mongoose": "^8.10.0",
     "ms": "^2.0.0",
     "natural-compare": "^1.4.0",
     "negotiator": "^0.6.3",
@@ -282,18 +280,18 @@
     "yocto-queue": "^0.1.0"
   },
   "scripts": {
+    "build": "echo 'No build step required'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "swagger-autogen": "node swagger.js"
+    "start": "node server.js"
   },
   "author": "Samuel Chacon",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sechafer/ChronoCanvas.git"
+    "url": "git+https://github.com/kittys201/cse341-project2.git"
   },
   "bugs": {
-    "url": "https://github.com/sechafer/ChronoCanvas/issues"
+    "url": "https://github.com/kittys201/cse341-project2/issues"
   },
-  "homepage": "https://github.com/sechafer/ChronoCanvas/#readme"
+  "homepage": "https://github.com/kittys201/cse341-project2#readme"
 }

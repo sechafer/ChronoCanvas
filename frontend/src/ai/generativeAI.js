@@ -8,49 +8,35 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generateAIContent(birthDate){
 const prompt = `
-Given a birth date, provide the following details in JSON format:
-- Day of the week (e.g., Monday, Tuesday, etc.)
-- Birthstone (the one most popular associated with the birth month)
-- Birthstone Symbol (what the birthstone means)
-- Western zodiac sign
-- Western zodiac sign personality traits (top three)
-- Chinese zodiac sign
-- Chinese zodiac element
-- Birth flower (associated with the birth month)
-- svg that would be an image of an artistic representation of one or many parts of this data. Do not include any words just an artistic depiction. I should be able to use the svg directly from the json object in my application. be sure not to escape any of the quotes or have n for new lines.
-- image description that describes why you made the artistic decisions that you did with the svg.
+Given a birth date, return a JSON object with the following details:
 
-Use the date "March 15, 1990" as an example and ensure the output is structured as valid JSON.
+1. "date": The provided birth date in "Month Day, Year" format.
+2. "dayOfWeek": The full day of the week for the given date.
+3. "birthstone": The most commonly associated birthstone for that birth month.
+4. "birthstoneSymbol": A short phrase (three words) representing the meaning of the birthstone.
+5. "zodiac": The western zodiac sign based on the birth date.
+6. "zodiacSymbol": Three words/phrases describing key traits of the western zodiac sign.
+7. "chineseZodiac": The Chinese zodiac animal corresponding to the birth year.
+8. "chineseZodiacElement": The associated Chinese zodiac element.
+9. "birthFlower": The traditional birth flower for the birth month.
+10. "birthFlowerSymbol": Three words describing the symbolic meaning of the birth flower.
+11. "svg": An SVG string (not escaped, no new line characters) containing an artistic representation of the birthstone, zodiac, Chinese zodiac, and birth flower. 
+The SVG should be directly usable in an application. Make sure it is 800 x 600 pixels. No text or words should exist in the SVG.
+12. "imgDescription": A description of the artistic choices in the SVG without using the word "SVG".
 
-Example Input: March 15, 1990
-Expected Output:
-{
-  "date": "March 15, 1990",
-  "dayOfWeek": "Thursday",
-  "birthstone": "Aquamarine",
-  "birthstoneSymbol": "Protection, Health, and Tranquility",
-  "zodiac": "Pisces",
-  "zodiacSymbol": "Energetic, candid, and willful",
-  "chineseZodiac": "Horse",
-  "chineseZodiacElement": "Metal",
-  "birthFlower": "Daffodil",
-  "svg" : "<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">  </svg> preserve aspect ratio true"
-  "imgDescription" : "This features a calming blue aquamarine gradient background, symbolizing protection, health, and tranquility. A flowing Pisces symbol is placed at the center, representing energy, candidness, and willful nature. To the left, a metallic horse silhouette reflects the strength and determination of the Metal Horse from the Chinese Zodiac. A delicate daffodil, the birth flower, is positioned at the bottom right, symbolizing new beginnings and prosperity. The composition is accented with wave-like patterns to emphasize the fluid nature of Pisces, while the entire design maintains a celestial theme with subtle star elements to connect with astrological symbolism." do not use the word svg in the description.
+Ensure the output is valid JSON with proper formatting and contains no escape sequences for quotes. 
 
-}
-Now respond with the JSON object that I can parse for the provided date: ${birthDate}.
+Use the date "${birthDate}" as the input and return only the JSON object with no additional text or formatting.
+
 `;
 
 
     try {
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
-        console.log(result.response.text());
-        console.log("Response Text:", responseText);
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch && jsonMatch[0]) {
             const parsedResult = JSON.parse(jsonMatch[0]); // Parse the matched JSON
-            console.log("Parsed JSON:", parsedResult);
             return parsedResult;
         } else {
             throw new Error("No JSON object found in the response text.");
