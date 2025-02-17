@@ -11,8 +11,7 @@ export default function LoadingSpinner() {
       <img
         src={spinnerGif}
         alt="Loading..."
-        className="img-fluid"
-        style={{width: '150px'}}
+        className="img-fluid w-50"
       />
     </Container>
   );

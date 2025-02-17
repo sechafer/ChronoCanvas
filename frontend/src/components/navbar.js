@@ -16,6 +16,7 @@ export default function Navbar() {
         }}
       >
         <div className="container-fluid d-flex align-items-center">
+          {/* Logo - Hidden on Small Screens */}
           <div className="d-none d-sm-block">
             <Link to="/">
               <img 
@@ -30,6 +31,8 @@ export default function Navbar() {
               />
             </Link>
           </div>
+
+          {/* Title & Subtitle - Always Centered with Background */}
           <div className="d-flex flex-grow-1 justify-content-center me-sm-5 me-5 text-center">
             <div className="bg-light rounded px-3 py-1 me-sm-5 me-0">
               <h1 className="text-dark m-0 border-bottom">

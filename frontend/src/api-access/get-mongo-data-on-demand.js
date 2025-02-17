@@ -14,11 +14,7 @@ export const useFetchMongoOnDemand = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                //templeDedications/public?date=2025-02-11
-                //ldschurchhistory/public?date=2025-02-11
-                console.log('we are here', endpoint);
-                const response = await axios.get(`https://chronocanvas-bbv1.onrender.com/${endpoint}`);
-                //const response = await axios.get(`http://localhost:3001/${endpoint}`);
+                const response = await axios.get(`https://chronocanvas-api.onrender.com${endpoint}`);
                 setData(response.data);
                 setError("");
             } catch (err) {

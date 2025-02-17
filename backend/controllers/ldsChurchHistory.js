@@ -2,112 +2,175 @@ const { ObjectId } = require('mongodb');
 const mongodb = require('../data/database');
 
 const getSingle = async (req, res) => {
-  //#swagger.tags=['LDS_Church_History']
-  const historyId = new ObjectId(req.params.id);
-  const result = await mongodb.getDatabase().db().collection('LDS_Church_History').findOne({ _id: historyId });
-  res.status(200).json(result);
+    //#swagger.tags=['Church_History']
+    try {
+        const historyId = new ObjectId(req.params.id);
+        const db = mongodb.getDatabase();
+        
+        const result = await db.collection('Church_History').findOne({ _id: historyId });
+        
+        if (!result) {
+            return res.status(404).json({
+                message: 'Registro histórico no encontrado',
+                error: 'not_found'
+            });
+        }
+        
+        res.status(200).json({
+            message: 'Registro histórico encontrado',
+            data: result
+        });
+    } catch (error) {
+        console.error('Error en getSingle:', error);
+        res.status(500).json({
+            message: 'Error al obtener el registro histórico',
+            error: error.message
+        });
+    }
 };
 
 const getAll = async (req, res) => {
-  //#swagger.tags=['LDS_Church_History']
-   const result = await mongodb.getDatabase().db().collection('LDS_Church_History').find().toArray();
-  res.status(200).json(result);
+    //#swagger.tags=['Church_History']
+    try {
+        const db = mongodb.getDatabase();
+        const result = await db.collection('Church_History').find().toArray();
+        
+        res.status(200).json({
+            message: 'Registros históricos recuperados exitosamente',
+            data: result,
+            count: result.length
+        });
+    } catch (error) {
+        console.error('Error en getAll:', error);
+        res.status(500).json({
+            message: 'Error al obtener los registros históricos',
+            error: error.message
+        });
+    }
 };
 
 const createHistory = async (req, res) => {
- //#swagger.tags=['LDS_Church_History']
-    const newHistory = {
-    title: req.body.title,
-    description: req.body.description,
-    dateRange: req.body.dateRange
-  };
-  const result = await mongodb.getDatabase().db().collection('LDS_Church_History').insertOne(newHistory);
-  result.acknowledged ? res.status(201).json(result) : res.status(500).json({ error: 'Failed to create entry' });
-};
-
-const updateHistory = async (req, res) => {
-  //#swagger.tags=['LDS_Church_History']
-    const historyId = new ObjectId(req.params.id);
-  const updatedHistory = {
-    title: req.body.title,
-    description: req.body.description,
-    dateRange: req.body.dateRange
-  };
-  const result = await mongodb.getDatabase().db().collection('LDS_Church_History').updateOne({ _id: historyId }, { $set: updatedHistory });
-  result.modifiedCount > 0 ? res.status(200).json(result) : res.status(500).json({ error: 'Failed to update entry' });
-};
-
-const deleteHistory = async (req, res) => {
-  //#swagger.tags=['LDS_Church_History']
-    const historyId = new ObjectId(req.params.id);
-  const result = await mongodb.getDatabase().db().collection('LDS_Church_History').deleteOne({ _id: historyId });
-  result.deletedCount > 0 ? res.status(200).send() : res.status(500).json({ error: 'Failed to delete entry' });
-};
-
-const getClosestHistory = async (req, res) => {
+  //#swagger.tags=['Church_History']
   try {
-    // Validate that a date is provided via query parameter
-    if (!req.query.date) {
-      return res.status(400).json({ error: "Date query parameter is required (format YYYY-MM-DD or MM-DD)" });
-    }
+      const { event_name, event_date, description } = req.body;
+      
+      const newHistory = {
+          event_name,
+          event_date,
+          description,
+          createdAt: new Date(),
+          createdBy: req.user?.id || 'system'
+      };
 
-    // Parse the incoming date
-    const inputDate = new Date(req.query.date);
-    if (isNaN(inputDate.getTime())) {
-      return res.status(400).json({ error: "Invalid date format" });
-    }
+      const db = mongodb.getDatabase();
+      const result = await db.collection('Church_History').insertOne(newHistory);
 
-    // Normalize the query date to a fixed year (e.g., 2000) to compare month/day only
-    const queryDate = new Date(2000, inputDate.getMonth(), inputDate.getDate());
-
-    // Fetch all historical events from the collection
-    const events = await mongodb.getDatabase().db().collection('Church_History').find().toArray();
-
-    // If no events exist in the collection, return an error
-    if (!events || events.length === 0) {
-      return res.status(404).json({ error: "No historical events available" });
-    }
-
-    // Calculate the circular difference (ignoring year) for each event
-    let eventsWithDiff = events.map(event => {
-      const eventDate = new Date(event.event_date);
-      if (isNaN(eventDate.getTime())) return null; // Skip unparseable dates
-
-      // Normalize event date to the fixed year 2000
-      const normalizedEventDate = new Date(2000, eventDate.getMonth(), eventDate.getDate());
-      const oneDayMs = 24 * 60 * 60 * 1000;
-      let diffDays = Math.abs(normalizedEventDate - queryDate) / oneDayMs;
-
-      // Adjust for circular difference (wrap-around of the calendar year)
-      if (diffDays > 182.5) {
-        diffDays = 365 - diffDays;
+      if (!result.acknowledged) {
+          return res.status(500).json({
+              message: 'Error al crear el registro histórico',
+              error: 'insert_failed'
+          });
       }
-      return { ...event, diffDays };
-    }).filter(event => event !== null);
 
-    // If for some reason all event dates were unparseable, fallback to the first event in the collection
-    if (eventsWithDiff.length === 0) {
-      return res.status(200).json(events[0]);
-    }
-
-    // Find the event with the smallest circular difference
-    const closestHistory = eventsWithDiff.reduce((prev, curr) =>
-      curr.diffDays < prev.diffDays ? curr : prev
-    );
-
-    // Return the full event object (all available information)
-    return res.status(200).json(closestHistory);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Something went wrong" });
+      res.status(201).json({
+          message: 'Registro histórico creado exitosamente',
+          id: result.insertedId,
+          data: newHistory
+      });
+  } catch (error) {
+      console.error('Error en createHistory:', error);
+      res.status(500).json({
+          message: 'Error al crear el registro histórico',
+          error: error.message
+      });
   }
 };
 
+const updateHistory = async (req, res) => {
+  //#swagger.tags=['Church_History']
+  try {
+      // Validación del ID
+      if (!req.params.id || !ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({
+              message: 'ID de registro inválido',
+              error: 'invalid_history_id'
+          });
+      }
+
+      const historyId = new ObjectId(req.params.id);
+      const { event_name, event_date, description } = req.body;
+
+      const updatedHistory = {
+          event_name,
+          event_date,
+          description,
+          updatedAt: new Date(),
+          updatedBy: req.user?.id || 'system'
+      };
+
+      const db = mongodb.getDatabase();
+      const result = await db.collection('Church_History').updateOne(
+          { _id: historyId },
+          { $set: updatedHistory }
+      );
+
+      if (!result.matchedCount) {
+          return res.status(404).json({
+              message: 'Registro histórico no encontrado',
+              error: 'not_found'
+          });
+      }
+
+      // Obtener el documento actualizado para devolverlo en la respuesta
+      const updatedDocument = await db.collection('Church_History').findOne(
+          { _id: historyId }
+      );
+
+      res.status(200).json({
+          message: 'Registro histórico actualizado exitosamente',
+          data: updatedDocument
+      });
+  } catch (error) {
+      console.error('Error en updateHistory:', error);
+      res.status(500).json({
+          message: 'Error al actualizar el registro histórico',
+          error: error.message
+      });
+  }
+};
+
+const deleteHistory = async (req, res) => {
+    //#swagger.tags=['Church_History']
+    try {
+        const historyId = new ObjectId(req.params.id);
+        const db = mongodb.getDatabase();
+        
+        const result = await db.collection('Church_History').deleteOne({ _id: historyId });
+
+        if (!result.deletedCount) {
+            return res.status(404).json({
+                message: 'Registro histórico no encontrado',
+                error: 'not_found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Registro histórico eliminado exitosamente',
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error('Error en deleteHistory:', error);
+        res.status(500).json({
+            message: 'Error al eliminar el registro histórico',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
-  getSingle,
-  getAll,
-  createHistory,
-  updateHistory,
-  deleteHistory,
-  getClosestHistory
+    getSingle,
+    getAll,
+    createHistory,
+    updateHistory,
+    deleteHistory
 };
