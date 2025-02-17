@@ -141,7 +141,7 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más det
 
 ## ✍️ Autor
 
-Samuel Chacon
+
 - GitHub: [@sechafer](https://github.com/sechafer)
 
 ## 📞 Soporte
