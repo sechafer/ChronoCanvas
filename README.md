@@ -1,202 +1,149 @@
-# 🎨 ChronoCanvas
+# ChronoCanvas API
 
-## 🌟 Overview
-ChronoCanvas is a full-stack web application that transforms dates into artistic visualizations while integrating historical data from The Church of Jesus Christ of Latter-day Saints. It combines interactive drawing capabilities with historical records, creating a unique platform for exploring dates through art and history.
+## 🌟 Descripción
+ChronoCanvas es una API RESTful diseñada para gestionar registros históricos de la Iglesia de Jesucristo de los Santos de los Últimos Días. Esta API proporciona endpoints para manejar registros históricos, dedicaciones de templos y gestión de usuarios.
 
-🔗 **Live Demo:**
-- Frontend: [https://chronocanvas-1.onrender.com](https://chronocanvas-1.onrender.com)
-- Backend API: [https://chronocanvas-api.onrender.com](https://chronocanvas-api.onrender.com)
-- Repository: [https://github.com/bloominolive/ChronoCanvas.git](https://github.com/bloominolive/ChronoCanvas.git)
+## 🚀 Características Principales
 
-## ✨ Key Features
+- **Gestión de Registros Históricos**: CRUD completo para eventos históricos de la Iglesia
+- **Dedicaciones de Templos**: Manejo de información sobre dedicaciones de templos
+- **Sistema de Autenticación**: Soporte para JWT y OAuth 2.0 (GitHub)
+- **Documentación Swagger**: API completamente documentada
+- **Seguridad Robusta**: Middleware de autenticación y validación
+- **Manejo de Sesiones**: Implementación de sesiones con MongoDB
 
-### 🎯 Core Functionality
-- **Date Visualization**: Convert any date into a unique artistic canvas
-- **Interactive Drawing**: Built-in drawing tools for creative expression
-- **Historical Integration**: Connect personal dates with LDS Church history
-- **Temple Records**: Access and view temple dedication information
-- **Date Comparison**: Compare two dates side by side
-- **PDF Export**: Save and download your visualizations
+## 🛠️ Tecnologías Utilizadas
 
-### 🔐 User Features
-- Secure authentication system
-- Profile management
-- Personal data customization
-- Drawing saving capabilities
+- Node.js
+- Express.js
+- MongoDB
+- JWT (JSON Web Tokens)
+- Passport.js
+- Swagger
+- bcryptjs
+- express-validator
 
-## 🛠️ Technology Stack
+## 📋 Prerrequisitos
 
-### Frontend Technologies
-- **Core**: React 18
-- **UI Framework**: React Bootstrap
-- **Routing**: React Router Dom v7
-- **Drawing**: Konva & HTML5 Canvas
-- **HTTP Client**: Axios
-- **Styling**: CSS3 & FontAwesome
-- **PDF Generation**: HTML2Canvas & jsPDF
-
-### Backend Technologies
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB
-- **Authentication**: JWT & Passport.js
-- **Security**: Bcrypt
-- **Documentation**: Swagger
-- **Validation**: Express-validator
-
-## 📋 System Architecture
-
-### Frontend Architecture
-```
-frontend/
-├── src/
-│   ├── components/      # Reusable UI components
-│   ├── pages/          # Main application pages
-│   ├── context/        # React contexts
-│   ├── api-access/     # API integration
-│   ├── images/         # Static assets
-│   └── styles/         # CSS styles
-```
-
-### Backend Architecture
-```
-backend/
-├── controllers/     # Request handlers
-├── models/         # Database schemas
-├── routes/         # API endpoints
-├── middleware/     # Custom middleware
-├── config/         # Configuration files
-└── utils/          # Helper functions
-```
-
-## 🚀 API Endpoints
-
-### Authentication
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /auth/github` - GitHub OAuth
-- `GET /auth/verify` - Token verification
-
-### Church History
-- `GET /ldsChurchHistory` - List all records
-- `GET /ldsChurchHistory/:id` - Get specific record
-- `POST /ldsChurchHistory` - Create record
-- `PUT /ldsChurchHistory/:id` - Update record
-- `DELETE /ldsChurchHistory/:id` - Delete record
-
-### Temple Dedications
-- `GET /templeDedications` - List all dedications
-- `GET /templeDedications/:id` - Get specific dedication
-- `POST /templeDedications` - Create dedication
-- `PUT /templeDedications/:id` - Update dedication
-- `DELETE /templeDedications/:id` - Delete dedication
-
-## ⚙️ Installation and Setup
-
-### Prerequisites
-- Node.js (v14 or higher)
+- Node.js (v14 o superior)
 - MongoDB
 - Git
-- GitHub account (for OAuth)
+- Cuenta en GitHub (para autenticación OAuth)
 
-### Frontend Setup
-```bash
-# Clone repository
-git clone https://github.com/bloominolive/ChronoCanvas.git
+## ⚙️ Configuración
 
-# Navigate to frontend
-cd frontend
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/your-username/ChronoCanvas.git
+   cd ChronoCanvas
+   ```
 
-# Install dependencies
-npm install
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   ```
 
-# Create .env file
-echo "REACT_APP_API_URL=https://chronocanvas-api.onrender.com" > .env
+3. **Configurar variables de entorno**
+   Crear un archivo `.env` en la raíz del proyecto:
+   ```env
+   JWT_SECRET=tu_clave_super_segura
+   JWT_EXPIRATION=1h
+   CALLBACK_URL=http://localhost:3001/auth/github/callback
+   GITHUB_CLIENT_ID=tu_client_id
+   GITHUB_CLIENT_SECRET=tu_client_secret
+   MONGODB_URL=tu_url_mongodb
+   PORT=3001
+   FRONTEND_URL=http://localhost:3000
+   BASE_URL=http://localhost:3001
+   NODE_ENV=development
+   SESSION_SECRET=tu_secreto_seguro
+   ```
 
-# Start development server
-npm start
-```
+## 🚀 Iniciar el Proyecto
 
-### Backend Setup
-```bash
-# Navigate to backend
-cd backend
+1. **Desarrollo**
+   ```bash
+   npm run dev
+   ```
 
-# Install dependencies
-npm install
+2. **Producción**
+   ```bash
+   npm start
+   ```
 
-# Create .env file with required variables
-# See Backend Configuration section
+## 📚 Documentación de la API
 
-# Start server
-npm start
-```
+La documentación completa de la API está disponible en Swagger:
+- Local: `http://localhost:3001/swagger/api-docs`
+- Producción: `https://tu-dominio.com/swagger/api-docs`
 
-### Backend Configuration
-Create `.env` file with:
-```env
-JWT_SECRET=your_secret_key
-JWT_EXPIRATION=1h
-MONGODB_URL=your_mongodb_url
-PORT=3001
-GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_secret
-```
+### Endpoints Principales
 
-## 🔒 Security Features
-- JWT-based authentication
-- Password encryption with Bcrypt
-- Protected API routes
-- Input validation
-- XSS protection
-- CSRF protection
-- Rate limiting
-- Secure session management
+#### Autenticación
+- `POST /auth/register` - Registro de usuarios
+- `POST /auth/login` - Inicio de sesión
+- `GET /auth/github` - Autenticación con GitHub
+- `GET /auth/verify` - Verificación de token
 
-## 👥 User Management
-- Registration with validation
-- Secure login system
-- Profile editing
-- Password management
-- Account deletion
-- OAuth integration
+#### Registros Históricos
+- `GET /ldsChurchHistory` - Obtener todos los registros
+- `GET /ldsChurchHistory/:id` - Obtener registro específico
+- `POST /ldsChurchHistory` - Crear nuevo registro
+- `PUT /ldsChurchHistory/:id` - Actualizar registro
+- `DELETE /ldsChurchHistory/:id` - Eliminar registro
 
-## 🎨 Drawing Features
-- Color picker
-- Brush size control
-- Clear canvas option
-- Save/load functionality
-- Real-time drawing
-- Multiple canvas support
+#### Dedicaciones de Templos
+- `GET /templeDedications` - Obtener todas las dedicaciones
+- `GET /templeDedications/:id` - Obtener dedicación específica
+- `POST /templeDedications` - Crear nueva dedicación
+- `PUT /templeDedications/:id` - Actualizar dedicación
+- `DELETE /templeDedications/:id` - Eliminar dedicación
 
-## 🌐 Deployment
-Both frontend and backend are deployed on Render:
-- Frontend: [https://chronocanvas-1.onrender.com](https://chronocanvas-1.onrender.com)
-- Backend: [https://chronocanvas-api.onrender.com](https://chronocanvas-api.onrender.com)
+#### Usuarios
+- `GET /users` - Obtener todos los usuarios
+- `GET /users/:id` - Obtener usuario específico
+- `PUT /users/:id` - Actualizar usuario
+- `DELETE /users/:id` - Eliminar usuario
 
-## 👨‍💻 Author
+## 🔒 Autenticación
 
-- GitHub: [@bloominolive](https://github.com/bloominolive)
+El sistema implementa dos métodos de autenticación:
 
-## 🤝 Contributing
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. **JWT (JSON Web Tokens)**
+   - Usado para API endpoints
+   - Token expires en 1 hora por defecto
+   - Requiere email y password
 
-## 📝 License
-This project is licensed under the ISC License
+2. **OAuth con GitHub**
+   - Autenticación social
+   - No requiere password
+   - Crea automáticamente cuenta de usuario
 
-## 📞 Support
-For support or questions:
-- Open an issue on [GitHub](https://github.com/bloominolive/ChronoCanvas/issues)
-- Contact the development team
+## 🔐 Seguridad
 
-## 🔄 Future Enhancements
-- Mobile responsive optimization
-- Enhanced drawing tools
-- Additional historical data integration
-- Social sharing features
-- Collaborative drawing capabilities
-- Extended user customization options
+- Passwords hasheados con bcrypt
+- Validación de datos con express-validator
+- Protección contra XSS y CSRF
+- Rate limiting implementado
+- Sesiones seguras con MongoDB
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crear una nueva rama (`git checkout -b feature/AmazingFeature`)
+3. Commit los cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## 📝 Licencia
+
+Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más detalles.
+
+## ✍️ Autor
+
+
+- GitHub: [@sechafer](https://github.com/sechafer)
+
+## 📞 Soporte
+
+Para soporte y preguntas, por favor abrir un issue en el repositorio de GitHub.
