@@ -223,7 +223,6 @@ export default function Home() {
               </Col>
             </Row>
           )}
-
           <PaintApp />
         </Container>
       </div>
