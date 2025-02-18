@@ -1,8 +1,11 @@
 const router = require('express').Router();
 const dedicationsController = require('../controllers/templeDedications.js');
 const validation = require('../middleware/validate.js');
-const { verifyToken, isAuthenticated } = require('../middleware/auth.js');
+const { isAuthenticated } = require('../middleware/authenticate.js');
+const { verifyToken } = require('../middleware/auth.js'); // Importamos el middleware de JWT
 
+
+router.get('/public', dedicationsController.getClosestDedication);
 // Obtener un registro por ID (JWT o Passport)
 router.get('/:id', isAuthenticated, verifyToken, validation.checkMongoId, dedicationsController.getSingle);
 
@@ -17,5 +20,9 @@ router.put('/:id', isAuthenticated, verifyToken, validation.checkMongoId, valida
 
 // Eliminar un registro (JWT o Passport)
 router.delete('/:id', isAuthenticated, verifyToken, validation.checkMongoId, dedicationsController.deleteDedication);
+
+
+
+
 
 module.exports = router;

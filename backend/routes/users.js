@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const usersController = require('../controllers/users.js');
 const validation = require('../middleware/validate.js');
-//const { isAuthenticated } = require('../middleware/authenticate.js');
-const { verifyToken, isAuthenticated } = require('../middleware/auth.js'); // Importamos el middleware de JWT
+const { isAuthenticated } = require('../middleware/authenticate.js');
+const { verifyToken } = require('../middleware/auth.js'); // Importamos el middleware de JWT
 
 router.get('/:id', isAuthenticated,verifyToken, validation.checkMongoId, usersController.getSingle);
 router.get('/', isAuthenticated,verifyToken, usersController.getAll);
