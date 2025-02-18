@@ -8,5 +8,3 @@ A fun way to paint your birthday! Enter a date to see relevant data. Drag and dr
 Compare two days with the dual date page to see what similarities and differences there are between two dates. 
 
 Generative AI uses a prompt to generate the data and an SVG that is an abstract representation of the day with a description of why it used those elements in the SVG. 
-
-See backend directory for more data relating to backend work. 
