@@ -53,9 +53,9 @@ npm start
 - `/users/*` - User management
 
 ## 👥 Team & Contact
-- **Samuel Chacon** (sechafer@gmail.com) - "Iniciando proyecto final"
-- **Delaney Baker** - "Que sera, sera"
-- **Rene Olive** - "Ordinary things consistently done produce extraordinary results"
+- **Samuel Chacon** 
+- **Delaney Baker** -
+- **Rene Olive** - 
 
 ---
 
