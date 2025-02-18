@@ -2,7 +2,7 @@
 
 ## Visualize your day through art and history
 
-![ChronoCanvas](https://chronocanvas-1.onrender.com/static/media/ChronoCanvasLogo.e3fa1bccaed8cb68cb80.png)
+![ChronoCanvas](frontend/public/favicon.ico)
 
 > **Summary:** ChronoCanvas is a Senior Group Project for CSE499 that transforms dates into artistic visualizations. Built with React JS, MongoDB, Express, and Google's Generative AI (Gemini 1.5 Flash), this application lets you explore the unique character of any date through interactive elements. Simply enter a date to receive personalized visualizations featuring birthstones, zodiac signs, historical events, and an AI-generated SVG artwork. Drag and drop components around the page, create your own artwork on an interactive canvas, and save your creation as a PDF. The comparison feature allows you to view two dates side-by-side to discover similarities and differences. Each visualization includes an AI-generated explanation of the artistic elements used to represent your chosen date.
 
